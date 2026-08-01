@@ -1,0 +1,13 @@
+dist
+build
+.next
+node_modules
+coverage
+pnpm-lock.yaml
+apps/ios
+apps/android
+packages/contracts/generated
+
+# Спецификации и документация — не код, форматирование Prettier к ним не применяется
+docs/
+BACKLOG.md

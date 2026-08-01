@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.next/
+out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# OS
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage
+coverage/
+
+# iOS
+apps/ios/**/xcuserdata/
+apps/ios/**/DerivedData/
+apps/ios/**/*.xcuserstate
+
+# Android
+apps/android/**/.gradle/
+apps/android/**/build/
+apps/android/**/local.properties
+apps/android/**/.idea/
+apps/android/**/*.iml

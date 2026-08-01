@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Edit",
+      "Write",
+      "Bash(pnpm*)",
+      "Bash(npm*)",
+      "Bash(npx*)",
+      "Bash(nest*)",
+      "Bash(node*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git branch*)",
+      "Bash(git checkout*)",
+      "Bash(git stash*)",
+      "Bash(ls*)",
+      "Bash(cat*)",
+      "Bash(grep*)",
+      "Bash(find*)",
+      "Bash(mkdir*)",
+      "Bash(touch*)",
+      "Bash(echo*)",
+      "Bash(pwd)",
+      "Bash(cd*)"
+    ],
+    "deny": [
+      "Bash(rm -rf*)",
+      "Bash(rm -r*)",
+      "Bash(sudo*)",
+      "Bash(git push --force*)",
+      "Bash(git push origin main*)",
+      "Bash(git reset --hard*)",
+      "Bash(curl*)",
+      "Bash(wget*)",
+      "Bash(chmod*)",
+      "Bash(chown*)",
+      "Bash(kill*)",
+      "Bash(dd*)"
+    ]
+  }
+}
