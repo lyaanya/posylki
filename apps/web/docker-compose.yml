@@ -1,0 +1,13 @@
+services:
+  posylki:
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile
+    image: posylki-web:latest
+    container_name: posylki-web
+    restart: unless-stopped
+
+networks:
+  default:
+    name: n8n-docker-caddy_default
+    external: true
