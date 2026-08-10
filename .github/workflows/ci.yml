@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Тесты ходят в реальный Postgres проекта Supabase (см. E01 п. 1.4/1.16:
+    # настоящие транзакции недоступны через REST, только напрямую в базу).
+    # Секреты берутся из репозитория GitHub — см. README, раздел «CI».
+    env:
+      NODE_ENV: local
+      PORT: "3000"
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Установить зависимости
+        run: pnpm install --frozen-lockfile
+
+      - name: Линтинг
+        run: pnpm lint
+
+      - name: Форматирование
+        run: pnpm format:check
+
+      - name: Типы
+        run: pnpm typecheck
+
+      - name: Тесты
+        run: pnpm test
+
+      - name: Сборка
+        run: pnpm build
+
+      - name: Актуальность openapi.json (E01 п. 1.26)
+        run: |
+          # .env нужен только для этого шага — сама переменная приходит
+          # из env джобы выше, но app.module.ts всегда ищет файл .env
+          # в корне репозитория (см. rootEnvFilePath), поэтому создаём
+          # пустой файл: реальные значения уже в process.env.
+          touch .env
+          pnpm --filter @posylki/api run contracts:generate
+          if ! git diff --exit-code packages/contracts/openapi.json; then
+            echo "::error::packages/contracts/openapi.json устарел относительно кода контроллеров."
+            echo "::error::Выполните 'pnpm contracts:generate' локально и закоммитьте результат."
+            exit 1
+          fi

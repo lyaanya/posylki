@@ -14,7 +14,8 @@
     "typecheck": "pnpm -r --if-present run typecheck",
     "test": "pnpm -r --if-present run test",
     "build": "pnpm -r --if-present run build",
-    "dev": "pnpm -r --parallel --if-present run dev"
+    "dev": "pnpm -r --parallel --if-present run dev",
+    "contracts:generate": "pnpm --filter @posylki/api run contracts:generate && bash packages/contracts/generate-clients.sh"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",

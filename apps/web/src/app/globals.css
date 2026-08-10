@@ -1,9 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: #005b8d;
-  --color-primary-hover: #00456b;
+  --color-primary: #1e80b8;
+  --color-primary-hover: #17618c;
   --color-on-primary: #ffffff;
+  --color-action: #d82961;
+  --color-action-hover: #b8214f;
+  --color-on-action: #ffffff;
   --color-background: #faf9f5;
   --color-foreground: #0f2733;
   --color-card: #ffffff;
@@ -17,7 +20,7 @@
   --color-on-warning: #3a2a00;
   --color-destructive: #e5484d;
   --color-on-destructive: #ffffff;
-  --color-ring: #005b8d;
+  --color-ring: #1e80b8;
 
   --radius-sm: 12px;
   --radius-md: 16px;
@@ -29,9 +32,12 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-primary: #2e8fc0;
-    --color-primary-hover: #4ca3d1;
-    --color-on-primary: #06212d;
+    --color-primary: #5ca9d6;
+    --color-primary-hover: #7ebfe3;
+    --color-on-primary: #0c2733;
+    --color-action: #e2467c;
+    --color-action-hover: #c22d62;
+    --color-on-action: #2b0512;
     --color-background: #08202b;
     --color-foreground: #e7f1f5;
     --color-card: #0e2b38;
@@ -45,7 +51,7 @@
     --color-on-warning: #3a2a00;
     --color-destructive: #f16468;
     --color-on-destructive: #3a0a0b;
-    --color-ring: #2e8fc0;
+    --color-ring: #5ca9d6;
   }
 }
 
@@ -53,6 +59,9 @@
   --color-primary: var(--color-primary);
   --color-primary-hover: var(--color-primary-hover);
   --color-on-primary: var(--color-on-primary);
+  --color-action: var(--color-action);
+  --color-action-hover: var(--color-action-hover);
+  --color-on-action: var(--color-on-action);
   --color-background: var(--color-background);
   --color-foreground: var(--color-foreground);
   --color-card: var(--color-card);
@@ -75,7 +84,7 @@
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
 
-  --font-heading: var(--font-manrope);
+  --font-heading: var(--font-inter);
   --font-body: var(--font-inter);
 }
 

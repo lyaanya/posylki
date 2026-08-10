@@ -141,7 +141,7 @@ export default function NewListingPage() {
         <button
           type="button"
           onClick={next}
-          className="flex-1 rounded-full bg-primary py-3 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-hover"
+          className="flex-1 rounded-full bg-action py-3 text-sm font-semibold text-on-action transition-colors hover:bg-action-hover"
         >
           {step === TOTAL_STEPS ? dictionary.createListing.publish : dictionary.createListing.next}
         </button>

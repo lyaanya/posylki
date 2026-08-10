@@ -2,9 +2,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { AuditLogModule } from "./audit-log/audit-log.module.js";
 import { validateEnv } from "./config/env.js";
 import { DatabaseModule } from "./database/database.module.js";
 import { HealthModule } from "./health/health.module.js";
+import { LoggerModule } from "./logging/logger.module.js";
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -22,7 +24,9 @@ const rootEnvFilePath = path.resolve(currentDir, "../../../.env");
       validate: validateEnv,
       envFilePath: rootEnvFilePath,
     }),
+    LoggerModule,
     DatabaseModule,
+    AuditLogModule,
     HealthModule,
   ],
 })

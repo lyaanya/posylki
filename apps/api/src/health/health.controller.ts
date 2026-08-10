@@ -1,27 +1,39 @@
-import { Controller, Get, HttpStatus, Res } from "@nestjs/common";
+import { Controller, Get, HttpStatus, Inject, Res } from "@nestjs/common";
 import type { Response } from "express";
+import { sql, type Kysely } from "kysely";
+import type { DB } from "../database/database.js";
+import { DATABASE } from "../database/database.module.js";
 
 interface HealthResponse {
   status: "ok" | "degraded";
   timestamp: string;
-  database: "ok" | "unavailable" | "not_configured";
+  database: "ok" | "unavailable";
 }
 
 @Controller("health")
 export class HealthController {
-  /**
-   * Проверка базы данных подключается в задаче 1.3 вместе со слоем
-   * репозиториев. До этого момента поле database информирует о том,
-   * что проверка ещё не подключена, а не притворяется рабочей.
-   */
+  constructor(@Inject(DATABASE) private readonly db: Kysely<DB>) {}
+
   @Get()
-  check(@Res() res: Response): void {
+  async check(@Res() res: Response): Promise<void> {
+    const database = await this.checkDatabase();
+    const status = database === "ok" ? "ok" : "degraded";
+
     const body: HealthResponse = {
-      status: "ok",
+      status,
       timestamp: new Date().toISOString(),
-      database: "not_configured",
+      database,
     };
 
-    res.status(HttpStatus.OK).json(body);
+    res.status(status === "ok" ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE).json(body);
+  }
+
+  private async checkDatabase(): Promise<"ok" | "unavailable"> {
+    try {
+      await sql`select 1`.execute(this.db);
+      return "ok";
+    } catch {
+      return "unavailable";
+    }
   }
 }

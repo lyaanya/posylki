@@ -5,49 +5,41 @@ import { dictionary } from "@/lib/dictionary";
 import { listings, type ListingType } from "@/lib/mock-data";
 import { ListingCard } from "@/components/ListingCard";
 
-function SearchIcon() {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      className="size-4 text-muted-foreground"
-      fill="none"
-      aria-hidden="true"
-    >
-      <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M17 17l-3.5-3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
+const quickRoutes = [
+  { from: "Москва", to: "Нячанг" },
+  { from: "Санкт-Петербург", to: "Хошимин" },
+  { from: "Алматы", to: "Дананг" },
+  { from: "Нячанг", to: "Красноярск" },
+];
 
 export default function FeedPage() {
   const [tab, setTab] = useState<ListingType>("trip");
-  const [query, setQuery] = useState("");
+  const [fromQuery, setFromQuery] = useState("");
+  const [toQuery, setToQuery] = useState("");
 
   const filtered = useMemo(() => {
-    return listings.filter((listing) => {
-      const matchesTab = listing.type === tab;
-      const matchesQuery =
-        query.trim().length === 0 ||
-        `${listing.fromCity} ${listing.toCity}`.toLowerCase().includes(query.toLowerCase());
-      return matchesTab && matchesQuery;
-    });
-  }, [tab, query]);
+    return listings
+      .filter((listing) => {
+        const matchesTab = listing.type === tab;
+        const matchesFrom =
+          fromQuery.trim().length === 0 ||
+          listing.fromCity.toLowerCase().includes(fromQuery.toLowerCase());
+        const matchesTo =
+          toQuery.trim().length === 0 ||
+          listing.toCity.toLowerCase().includes(toQuery.toLowerCase());
+        return matchesTab && matchesFrom && matchesTo;
+      })
+      .sort((a, b) => b.courier.rating - a.courier.rating)
+      .slice(0, 5);
+  }, [tab, fromQuery, toQuery]);
 
   return (
-    <div className="py-6">
-      <h1 className="font-heading text-2xl font-bold text-foreground">{dictionary.feed.title}</h1>
+    <div className="py-10 text-center">
+      <h1 className="font-heading text-2xl font-bold text-foreground sm:text-3xl">
+        {dictionary.feed.heroTitle}
+      </h1>
 
-      <div className="mt-4 flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 shadow-sm">
-        <SearchIcon />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={dictionary.feed.searchPlaceholder}
-          className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-        />
-      </div>
-
-      <div className="mt-4 inline-flex rounded-full border border-border bg-card p-1">
+      <div className="mt-6 inline-flex rounded-full border border-border bg-card p-1">
         <button
           type="button"
           onClick={() => setTab("trip")}
@@ -68,15 +60,83 @@ export default function FeedPage() {
         </button>
       </div>
 
-      <div className="mt-4 flex flex-col gap-3">
-        {filtered.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border bg-card px-4 py-10 text-center">
-            <p className="font-medium text-foreground">{dictionary.feed.emptyTitle}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{dictionary.feed.emptyHint}</p>
+      <div className="mt-4 rounded-2xl border border-border bg-card p-4 text-left shadow-md sm:p-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-4 sm:divide-x sm:divide-border">
+          <div className="sm:px-4 sm:first:pl-0">
+            <label className="block text-[11px] font-bold tracking-wide text-muted-foreground uppercase">
+              {dictionary.createListing.fromLabel}
+            </label>
+            <input
+              value={fromQuery}
+              onChange={(e) => setFromQuery(e.target.value)}
+              placeholder={dictionary.feed.anyCity}
+              className="w-full bg-transparent text-base font-semibold text-foreground outline-none placeholder:font-normal placeholder:text-muted-foreground"
+            />
           </div>
-        ) : (
-          filtered.map((listing) => <ListingCard key={listing.id} listing={listing} />)
-        )}
+          <div className="sm:px-4">
+            <label className="block text-[11px] font-bold tracking-wide text-muted-foreground uppercase">
+              {dictionary.createListing.toLabel}
+            </label>
+            <input
+              value={toQuery}
+              onChange={(e) => setToQuery(e.target.value)}
+              placeholder={dictionary.feed.anyCity}
+              className="w-full bg-transparent text-base font-semibold text-foreground outline-none placeholder:font-normal placeholder:text-muted-foreground"
+            />
+          </div>
+          <div className="sm:px-4">
+            <span className="block text-[11px] font-bold tracking-wide text-muted-foreground uppercase">
+              {dictionary.feed.dateLabel}
+            </span>
+            <p className="text-base font-semibold text-foreground">{dictionary.feed.dateAny}</p>
+          </div>
+          <div className="sm:pl-4">
+            <span className="block text-[11px] font-bold tracking-wide text-muted-foreground uppercase">
+              {dictionary.feed.cargoLabel}
+            </span>
+            <p className="text-base font-semibold text-foreground">{dictionary.feed.cargoAny}</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="mt-4 w-full rounded-xl bg-primary py-3 text-sm font-bold text-on-primary transition-colors hover:bg-primary-hover"
+        >
+          {dictionary.feed.searchCta}
+        </button>
+      </div>
+
+      <div className="mt-4 flex flex-wrap justify-center gap-2">
+        {quickRoutes.map((route) => (
+          <button
+            key={`${route.from}-${route.to}`}
+            type="button"
+            onClick={() => {
+              setFromQuery(route.from);
+              setToQuery(route.to);
+            }}
+            className="rounded-full bg-muted px-3.5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-border"
+          >
+            {route.from} → {route.to}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-10 text-left">
+        <h2 className="font-heading text-lg font-bold text-foreground">
+          {dictionary.feed.resultsTitle}
+        </h2>
+        <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          {filtered.length === 0 ? (
+            <div className="px-4 py-10 text-center">
+              <p className="font-medium text-foreground">{dictionary.feed.emptyTitle}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{dictionary.feed.emptyHint}</p>
+            </div>
+          ) : (
+            filtered.map((listing, index) => (
+              <ListingCard key={listing.id} listing={listing} rank={index + 1} />
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

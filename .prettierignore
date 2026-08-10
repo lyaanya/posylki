@@ -11,3 +11,6 @@ packages/contracts/generated
 # Спецификации и документация — не код, форматирование Prettier к ним не применяется
 docs/
 BACKLOG.md
+
+# Локальный кэш Supabase CLI — генерируется автоматически, не наш код
+supabase/.temp

@@ -5,6 +5,9 @@ packages:
   - "packages/*"
 
 allowBuilds:
+  # Телеметрийный postinstall, функционально не нужен пакету, который его тянет.
+  # Осознанно не разрешаем — проект и так строится вокруг приватности пользователей.
+  "@scarf/scarf": false
   esbuild: true
   sharp: true
 

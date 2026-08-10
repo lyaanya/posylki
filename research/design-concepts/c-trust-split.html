@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VEZY — концепт C: trust-split</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-primary: #1e80b8; --color-primary-hover: #17618c; --color-on-primary: #ffffff;
+    --color-action: #d82961; --color-action-hover: #b8214f; --color-on-action: #ffffff;
+    --color-background: #faf9f5; --color-foreground: #0f2733; --color-card: #ffffff;
+    --color-muted: #eef3f5; --color-muted-foreground: #5b7480; --color-border: #dce6ea;
+    --color-success: #0e8f6c; --color-success-soft: #e3f4ee;
+    --radius-sm: 12px; --radius-md: 16px; --radius-lg: 20px;
+    --shadow-sm: 0 1px 2px rgba(15,39,51,.06), 0 1px 3px rgba(15,39,51,.08);
+    --shadow-md: 0 4px 16px rgba(15,39,51,.1), 0 2px 4px rgba(15,39,51,.06);
+  }
+  * { box-sizing: border-box; } html,body { margin:0; padding:0; }
+  body { background: var(--color-background); color: var(--color-foreground); font-family:"Inter",sans-serif; }
+  h1,h2,h3,.heading { font-family:"Manrope",sans-serif; }
+  a { color:inherit; text-decoration:none; } button { font:inherit; color:inherit; cursor:pointer; }
+  .wrap { max-width:1180px; margin:0 auto; padding:0 48px; }
+  .logo { color: var(--color-primary); height:30px; width:auto; }
+
+  .site-header { border-bottom:1px solid var(--color-border); }
+  .site-header .wrap { display:flex; align-items:center; justify-content:space-between; padding:14px 48px; }
+  .btn-add { display:inline-flex; align-items:center; gap:6px; background:var(--color-action); color:var(--color-on-action); border:none; border-radius:999px; padding:9px 16px 9px 12px; font-size:13.5px; font-weight:700; }
+  .icon-btn { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; color:var(--color-muted-foreground); }
+
+  .trust-bar { background:var(--color-foreground); color:#fff; padding:10px 0; }
+  .trust-bar .wrap { display:flex; justify-content:center; gap:40px; font-size:12.5px; font-weight:600; }
+  .trust-bar .wrap span { display:flex; align-items:center; gap:6px; opacity:.92; }
+  .trust-bar svg { color:#8ecdff; flex-shrink:0; }
+
+  .hero { padding:48px 0 60px; text-align:center; }
+  .hero h1 { font-size:34px; font-weight:800; margin:0 auto 12px; max-width:16ch; line-height:1.18; }
+  .hero p { font-size:15px; color:var(--color-muted-foreground); max-width:46ch; margin:0 auto 36px; }
+
+  .split { display:grid; grid-template-columns:1fr 1fr; gap:20px; text-align:left; }
+  .path-card { background:var(--color-card); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:28px; box-shadow:var(--shadow-md); }
+  .path-card .icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:16px; }
+  .path-card.a .icon { background:var(--color-primary); color:#fff; }
+  .path-card.b .icon { background:var(--color-action); color:#fff; }
+  .path-card h3 { font-size:19px; margin:0 0 6px; }
+  .path-card p { font-size:13.5px; color:var(--color-muted-foreground); margin:0 0 18px; }
+  .mini-fields { display:flex; gap:8px; margin-bottom:14px; }
+  .mini-fields div { flex:1; background:var(--color-muted); border-radius:9px; padding:9px 12px; font-size:13px; }
+  .mini-fields div b { display:block; font-size:10px; text-transform:uppercase; color:var(--color-muted-foreground); font-weight:700; }
+  .path-btn { width:100%; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight:700; }
+  .path-card.a .path-btn { background:var(--color-primary); color:#fff; }
+  .path-card.b .path-btn { background:var(--color-action); color:#fff; }
+
+  .verify-strip { padding:48px 0 64px; background:var(--color-muted); margin-top:8px; }
+  .verify-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; text-align:center; }
+  .verify-grid .num { font-family:"Manrope",sans-serif; font-size:26px; font-weight:800; color:var(--color-primary); }
+  .verify-grid .lbl { font-size:13px; color:var(--color-muted-foreground); margin-top:2px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><symbol id="logo-vezy" viewBox="0 0 320 128"><text x="4" y="84" font-family="Manrope,sans-serif" font-weight="800" font-size="92" letter-spacing="-3" fill="currentColor">VEZY</text><path d="M6 102 C 92 122, 224 118, 302 94" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="302" cy="94" r="6" fill="currentColor"/></symbol></svg>
+
+<header class="site-header">
+  <div class="wrap">
+    <svg class="logo" viewBox="0 0 320 128"><use href="#logo-vezy"/></svg>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn-add">+ Добавить</button>
+      <span class="icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 20c1.4-3.4 4.4-5.5 7.5-5.5s6.1 2.1 7.5 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+    </div>
+  </div>
+</header>
+
+<div class="trust-bar">
+  <div class="wrap">
+    <span><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 2l6 2.5v5c0 4.2-2.6 7.4-6 8.5-3.4-1.1-6-4.3-6-8.5v-5z" stroke="currentColor" stroke-width="1.6"/></svg>Верификация по паспорту</span>
+    <span><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Безопасная сделка</span>
+    <span><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 2v16M2 10h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Деньги — напрямую между вами</span>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>Доставка с попутчиками, которой можно доверять</h1>
+    <p>P2P-сервис между Россией и странами СНГ / ЮВА. Обязательная верификация личности каждого участника — не просто визуальный бейдж.</p>
+
+    <div class="split">
+      <div class="path-card a">
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke="currentColor" stroke-width="1.6"/></svg></div>
+        <h3>Мне нужно отправить посылку</h3>
+        <p>Найдите попутчика, летящего по вашему маршруту</p>
+        <div class="mini-fields">
+          <div><b>Откуда</b>Москва</div>
+          <div><b>Куда</b>Нячанг</div>
+        </div>
+        <button class="path-btn">Найти рейс</button>
+      </div>
+      <div class="path-card b">
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 14l7-2 4-8 2 1-2 7 6-1 2 2-8 3-2 5-2-1 1-5-6 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+        <h3>У меня есть место в багаже</h3>
+        <p>Разместите рейс и заработайте на поездке</p>
+        <div class="mini-fields">
+          <div><b>Маршрут</b>Указать</div>
+          <div><b>Дата</b>Указать</div>
+        </div>
+        <button class="path-btn">Разместить рейс</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="verify-strip">
+  <div class="wrap">
+    <div class="verify-grid">
+      <div><div class="num">210</div><div class="lbl">направлений между 15 городами</div></div>
+      <div><div class="num">4</div><div class="lbl">валюты без наценки за конвертацию</div></div>
+      <div><div class="num">100%</div><div class="lbl">курьеров проходят проверку документа</div></div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

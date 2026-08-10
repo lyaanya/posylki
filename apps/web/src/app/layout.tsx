@@ -17,7 +17,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Посылки — доставка с попутчиками",
+  title: "VEZZY — доставка с попутчиками",
   description: "P2P-доставка посылок с попутчиками между Россией и странами проживания экспатов",
 };
 

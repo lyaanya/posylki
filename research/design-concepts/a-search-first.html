@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VEZY — концепт A: search-first</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-primary: #1e80b8; --color-primary-hover: #17618c; --color-on-primary: #ffffff;
+    --color-action: #d82961; --color-action-hover: #b8214f; --color-on-action: #ffffff;
+    --color-background: #faf9f5; --color-foreground: #0f2733; --color-card: #ffffff;
+    --color-muted: #eef3f5; --color-muted-foreground: #5b7480; --color-border: #dce6ea;
+    --color-success: #0e8f6c; --color-success-soft: #e3f4ee;
+    --radius-sm: 12px; --radius-md: 16px; --radius-lg: 20px;
+    --shadow-sm: 0 1px 2px rgba(15,39,51,.06), 0 1px 3px rgba(15,39,51,.08);
+    --shadow-md: 0 4px 16px rgba(15,39,51,.1), 0 2px 4px rgba(15,39,51,.06);
+  }
+  * { box-sizing: border-box; } html,body { margin:0; padding:0; }
+  body { background: var(--color-background); color: var(--color-foreground); font-family:"Inter",sans-serif; }
+  h1,h2,h3,.heading { font-family:"Inter",sans-serif; }
+  a { color:inherit; text-decoration:none; } button { font:inherit; color:inherit; cursor:pointer; }
+  .wrap { max-width:1180px; margin:0 auto; padding:0 48px; }
+  .logo { color: var(--color-primary); height:32px; width:auto; }
+
+  .site-header { border-bottom:1px solid var(--color-border); }
+  .site-header .wrap { display:flex; align-items:center; justify-content:space-between; padding:16px 48px; }
+  .icon-btn { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; color:var(--color-muted-foreground); }
+  .btn-add { display:inline-flex; align-items:center; gap:6px; background:var(--color-action); color:var(--color-on-action); border:none; border-radius:999px; padding:9px 16px 9px 12px; font-size:13.5px; font-weight:700; }
+
+  /* HERO: search form is the dominant object */
+  .hero { position:relative; padding:56px 0 40px; text-align:center; overflow:hidden; }
+  .hero .wrap { position:relative; z-index:1; }
+  .eyebrow { font-size:13px; font-weight:600; color:var(--color-muted-foreground); margin-bottom:10px; }
+  .hero h1 { font-family:"Inter",sans-serif; font-size:30px; font-weight:800; margin:0 0 32px; letter-spacing:-0.01em; }
+
+  .search-tabs { display:inline-flex; background:var(--color-muted); border-radius:999px; padding:4px; margin-bottom:0; }
+  .search-tabs button { padding:9px 22px; border-radius:999px; border:none; background:transparent; font-size:14px; font-weight:700; color:var(--color-muted-foreground); }
+  .search-tabs button.active { background:var(--color-card); color:var(--color-primary); box-shadow:var(--shadow-sm); }
+
+  .search-panel { background:var(--color-card); border:1px solid var(--color-border); border-radius:var(--radius-lg); box-shadow:var(--shadow-md); margin-top:16px; padding:22px; text-align:left; }
+  .search-grid { display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:0; align-items:stretch; }
+  .field { padding:6px 20px; border-right:1px solid var(--color-border); }
+  .field:last-of-type { border-right:none; }
+  .field label { display:block; font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--color-muted-foreground); margin-bottom:4px; }
+  .field .val { font-size:16px; font-weight:600; }
+  .field .sub { font-size:12px; color:var(--color-muted-foreground); }
+  .btn-search { background:var(--color-primary); color:var(--color-on-primary); border:none; border-radius:12px; padding:0 34px; font-size:15px; font-weight:700; margin-left:16px; }
+  .btn-search:hover { background:var(--color-primary-hover); }
+
+  .quick-routes { display:flex; gap:10px; justify-content:center; margin-top:18px; flex-wrap:wrap; }
+  .quick-routes a { font-size:13px; font-weight:600; color:var(--color-primary); background:var(--color-muted); border-radius:999px; padding:7px 14px; }
+
+  /* top-5 couriers leaderboard */
+  .leaders { padding:40px 0 64px; }
+  .leaders-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px; text-align:left; }
+  .leaders-head h2 { font-family:"Inter",sans-serif; font-size:19px; font-weight:700; margin:0; }
+  .leaders-head span { font-size:13px; color:var(--color-muted-foreground); }
+  .leaders-head a { font-size:13px; font-weight:600; color:var(--color-primary); }
+  .leaders-list { background:var(--color-card); border:1px solid var(--color-border); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); overflow:hidden; text-align:left; }
+  .leader-row { display:flex; align-items:center; gap:16px; padding:14px 20px; border-bottom:1px solid var(--color-border); }
+  .leader-row:last-child { border-bottom:none; }
+  .leader-rank { font-family:"Inter",sans-serif; font-weight:800; font-size:15px; color:var(--color-muted-foreground); width:20px; }
+  .leader-avatar { position:relative; width:38px; height:38px; border-radius:50%; background:var(--color-primary); color:#fff; display:flex; align-items:center; justify-content:center; font-family:"Inter",sans-serif; font-weight:700; font-size:13px; flex-shrink:0; }
+  .leader-avatar .check { position:absolute; right:-2px; bottom:-2px; width:14px; height:14px; border-radius:50%; background:var(--color-success); border:2px solid var(--color-card); display:flex; align-items:center; justify-content:center; }
+  .leader-name { font-weight:700; font-size:14.5px; }
+  .leader-route { font-size:12.5px; color:var(--color-muted-foreground); margin-top:1px; }
+  .leader-stats { margin-left:auto; text-align:right; }
+  .leader-rating { font-weight:700; font-size:14px; }
+  .leader-rating .star { color:#f5a623; }
+  .leader-deals { font-size:12px; color:var(--color-muted-foreground); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><symbol id="logo-vezy" viewBox="0 0 320 128"><text x="4" y="84" font-family="MorfinSans, Manrope, sans-serif" font-weight="800" font-size="130" letter-spacing="-2" fill="currentColor">VEZZY</text><path d="M6 102 C 92 122, 224 118, 302 94" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="302" cy="94" r="6" fill="currentColor"/></symbol></svg>
+
+<header class="site-header">
+  <div class="wrap">
+    <svg class="logo" viewBox="0 0 320 128"><use href="#logo-vezy"/></svg>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn-add">+ Добавить</button>
+      <span class="icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 20c1.4-3.4 4.4-5.5 7.5-5.5s6.1 2.1 7.5 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>Доставка с попутчиками, которой можно доверять</h1>
+
+    <div class="search-tabs">
+      <button class="active">Рейсы</button>
+      <button>Заявки</button>
+    </div>
+
+    <div class="search-panel">
+      <div class="search-grid">
+        <div class="field"><label>Откуда</label><div class="val">Москва</div></div>
+        <div class="field"><label>Куда</label><div class="val">Нячанг</div></div>
+        <div class="field"><label>Дата</label><div class="val">Любая</div><div class="sub">±3 дня</div></div>
+        <div class="field" style="border-right:none"><label>Тип груза</label><div class="val">Любой</div><div class="sub">документы, вещи</div></div>
+        <button class="btn-search">Найти рейсы</button>
+      </div>
+    </div>
+
+    <div class="quick-routes">
+      <a href="#">Москва → Нячанг</a>
+      <a href="#">Алматы → Бишкек</a>
+      <a href="#">СПб → Хошимин</a>
+      <a href="#">Красноярск → Дананг</a>
+    </div>
+  </div>
+</section>
+
+<section class="leaders">
+  <div class="wrap">
+    <div class="leaders-head">
+      <h2>Топ-5 объявлений</h2>
+      <a href="#">Вся лента →</a>
+    </div>
+    <div class="leaders-list">
+      <div class="leader-row">
+        <div class="leader-rank">1</div>
+        <div class="leader-avatar">МД<span class="check"></span></div>
+        <div><div class="leader-name">Михаил Д.</div><div class="leader-route">Москва → Нячанг · 15 кг свободно</div></div>
+        <div class="leader-stats"><div class="leader-rating"><span class="star">★</span> 4,98</div><div class="leader-deals">148 доставок</div></div>
+      </div>
+      <div class="leader-row">
+        <div class="leader-rank">2</div>
+        <div class="leader-avatar">АЛ<span class="check"></span></div>
+        <div><div class="leader-name">Анна Л.</div><div class="leader-route">Красноярск → Дананг · 9 кг свободно</div></div>
+        <div class="leader-stats"><div class="leader-rating"><span class="star">★</span> 4,95</div><div class="leader-deals">64 доставки</div></div>
+      </div>
+      <div class="leader-row">
+        <div class="leader-rank">3</div>
+        <div class="leader-avatar">ИК<span class="check"></span></div>
+        <div><div class="leader-name">Ирина К.</div><div class="leader-route">Санкт-Петербург → Хошимин · 8 кг свободно</div></div>
+        <div class="leader-stats"><div class="leader-rating"><span class="star">★</span> 4,91</div><div class="leader-deals">32 доставки</div></div>
+      </div>
+      <div class="leader-row">
+        <div class="leader-rank">4</div>
+        <div class="leader-avatar">ДВ<span class="check"></span></div>
+        <div><div class="leader-name">Дмитрий В.</div><div class="leader-route">Алматы → Бишкек · 23 кг свободно</div></div>
+        <div class="leader-stats"><div class="leader-rating"><span class="star">★</span> 4,87</div><div class="leader-deals">21 доставка</div></div>
+      </div>
+      <div class="leader-row">
+        <div class="leader-rank">5</div>
+        <div class="leader-avatar">ЕК<span class="check"></span></div>
+        <div><div class="leader-name">Елена К.</div><div class="leader-route">Воронеж → Ханой · 5 кг свободно</div></div>
+        <div class="leader-stats"><div class="leader-rating"><span class="star">★</span> 4,82</div><div class="leader-deals">17 доставок</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

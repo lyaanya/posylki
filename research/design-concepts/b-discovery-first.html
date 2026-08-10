@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VEZY — концепт B: discovery-first</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-primary: #1e80b8; --color-primary-hover: #17618c; --color-on-primary: #ffffff;
+    --color-action: #d82961; --color-action-hover: #b8214f; --color-on-action: #ffffff;
+    --color-background: #faf9f5; --color-foreground: #0f2733; --color-card: #ffffff;
+    --color-muted: #eef3f5; --color-muted-foreground: #5b7480; --color-border: #dce6ea;
+    --color-success: #0e8f6c; --color-success-soft: #e3f4ee; --color-warning:#f5a623;
+    --radius-sm: 12px; --radius-md: 16px; --radius-lg: 20px;
+    --shadow-sm: 0 1px 2px rgba(15,39,51,.06), 0 1px 3px rgba(15,39,51,.08);
+    --shadow-md: 0 4px 16px rgba(15,39,51,.1), 0 2px 4px rgba(15,39,51,.06);
+  }
+  * { box-sizing: border-box; } html,body { margin:0; padding:0; }
+  body { background: var(--color-background); color: var(--color-foreground); font-family:"Inter",sans-serif; }
+  h1,h2,h3,.heading { font-family:"Manrope",sans-serif; }
+  a { color:inherit; text-decoration:none; } button { font:inherit; color:inherit; cursor:pointer; }
+  .wrap { max-width:1180px; margin:0 auto; padding:0 48px; }
+  .logo { color: var(--color-primary); height:30px; width:auto; }
+
+  .site-header { border-bottom:1px solid var(--color-border); }
+  .site-header .wrap { display:flex; align-items:center; gap:28px; padding:14px 48px; }
+  .compact-search { flex:1; max-width:520px; display:flex; align-items:center; gap:10px; background:var(--color-muted); border-radius:999px; padding:9px 16px; font-size:14px; color:var(--color-muted-foreground); }
+  .compact-search b { color:var(--color-foreground); font-weight:600; }
+  .compact-search .divider { width:1px; height:16px; background:var(--color-border); }
+  .header-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
+  .btn-add { display:inline-flex; align-items:center; gap:6px; background:var(--color-action); color:var(--color-on-action); border:none; border-radius:999px; padding:9px 16px 9px 12px; font-size:13.5px; font-weight:700; }
+  .icon-btn { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; color:var(--color-muted-foreground); }
+
+  .section { padding:28px 0; }
+  .section-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px; }
+  .section-head h2 { font-size:18px; font-weight:700; margin:0; }
+  .section-head a { font-size:13px; font-weight:600; color:var(--color-primary); }
+
+  .carousel { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .route-card { border-radius:var(--radius-md); overflow:hidden; background:var(--color-card); border:1px solid var(--color-border); box-shadow:var(--shadow-sm); }
+  .route-card .photo { height:120px; position:relative; }
+  .route-card .photo .badge { position:absolute; top:10px; left:10px; background:#fff; border-radius:999px; padding:3px 10px; font-size:10.5px; font-weight:700; color:var(--color-success); }
+  .route-card .body { padding:12px 14px; }
+  .route-card .route { font-family:"Manrope",sans-serif; font-weight:700; font-size:14.5px; }
+  .route-card .meta { font-size:12px; color:var(--color-muted-foreground); margin-top:3px; }
+  .route-card .price { font-weight:700; margin-top:6px; font-size:13.5px; }
+
+  .g1 .photo{background:linear-gradient(135deg,#1e80b8,#17618c)}
+  .g2 .photo{background:linear-gradient(135deg,#8a4a6b,#d82961)}
+  .g3 .photo{background:linear-gradient(135deg,#0e8f6c,#1e80b8)}
+  .g4 .photo{background:linear-gradient(135deg,#d8794a,#d82961)}
+
+  .type-tabs { display:flex; gap:8px; margin:8px 0 20px; }
+  .type-tabs button { padding:8px 18px; border-radius:999px; border:1px solid var(--color-border); background:var(--color-card); font-size:13.5px; font-weight:600; color:var(--color-muted-foreground); }
+  .type-tabs button.active { background:var(--color-foreground); color:var(--color-background); border-color:var(--color-foreground); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><symbol id="logo-vezy" viewBox="0 0 320 128"><text x="4" y="84" font-family="Manrope,sans-serif" font-weight="800" font-size="92" letter-spacing="-3" fill="currentColor">VEZY</text><path d="M6 102 C 92 122, 224 118, 302 94" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="302" cy="94" r="6" fill="currentColor"/></symbol></svg>
+
+<header class="site-header">
+  <div class="wrap">
+    <svg class="logo" viewBox="0 0 320 128"><use href="#logo-vezy"/></svg>
+    <div class="compact-search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M19 19l-4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <b>Куда</b> отправить посылку? <span class="divider"></span> <span>Любая дата</span>
+    </div>
+    <div class="header-right">
+      <button class="btn-add">+ Добавить</button>
+      <span class="icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 20c1.4-3.4 4.4-5.5 7.5-5.5s6.1 2.1 7.5 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="type-tabs" style="margin-top:24px">
+    <button class="active">Рейсы</button>
+    <button>Заявки</button>
+  </div>
+
+  <section class="section" style="padding-top:0">
+    <div class="section-head"><h2>Популярные направления</h2><a href="#">Все направления →</a></div>
+    <div class="carousel">
+      <div class="route-card g1"><div class="photo"><span class="badge">✓ Проверен</span></div><div class="body"><div class="route">Москва → Нячанг</div><div class="meta">Сегодня · 15 кг свободно</div><div class="price">от 1 200 ₽/кг</div></div></div>
+      <div class="route-card g2"><div class="photo"></div><div class="body"><div class="route">СПб → Хошимин</div><div class="meta">Завтра · 5 кг свободно</div><div class="price">от 1 500 ₽/кг</div></div></div>
+      <div class="route-card g3"><div class="photo"><span class="badge">✓ Проверен</span></div><div class="body"><div class="route">Алматы → Бишкек</div><div class="meta">Через 3 дня · 20 кг</div><div class="price">от 900 ₽/кг</div></div></div>
+      <div class="route-card g4"><div class="photo"></div><div class="body"><div class="route">Красноярск → Дананг</div><div class="meta">На неделе · 8 кг</div><div class="price">от 1 100 ₽/кг</div></div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>Курьеры с высоким рейтингом</h2><a href="#">Смотреть всех →</a></div>
+    <div class="carousel">
+      <div class="route-card g3"><div class="photo"><span class="badge">★ 5,0</span></div><div class="body"><div class="route">Михаил Д.</div><div class="meta">148 доставок · Москва ↔ Нячанг</div></div></div>
+      <div class="route-card g1"><div class="photo"><span class="badge">★ 4,9</span></div><div class="body"><div class="route">Ирина К.</div><div class="meta">32 доставки · СПб ↔ Хошимин</div></div></div>
+      <div class="route-card g2"><div class="photo"><span class="badge">★ 4,8</span></div><div class="body"><div class="route">Дмитрий В.</div><div class="meta">21 доставка · Алматы ↔ Бишкек</div></div></div>
+      <div class="route-card g4"><div class="photo"><span class="badge">★ 5,0</span></div><div class="body"><div class="route">Анна Л.</div><div class="meta">64 доставки · Красноярск ↔ Дананг</div></div></div>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>

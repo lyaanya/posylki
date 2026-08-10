@@ -60,7 +60,7 @@ export function BottomNav() {
         <Link
           href="/listings/new"
           aria-label={dictionary.feed.createCta}
-          className="-mt-6 flex size-12 items-center justify-center rounded-full bg-primary text-on-primary shadow-md"
+          className="-mt-6 flex size-12 items-center justify-center rounded-full bg-action text-on-action shadow-md transition-colors hover:bg-action-hover"
         >
           <PlusIcon />
         </Link>

@@ -1,13 +1,14 @@
 import { Kysely, PostgresDialect, type Transaction } from "kysely";
 import { Pool } from "pg";
+import type { AuditLogTable } from "../audit-log/audit-log.types.js";
 
 /**
  * Схема базы, дополняется по мере появления таблиц в каждом эпике —
- * каждая новая таблица добавляется сюда как поле: `audit_log: AuditLogTable`.
- * Пустая на этапе E01: ни одной продуктовой таблицы ещё нет.
+ * каждая новая таблица добавляется сюда как поле: `<table>: <Table>Table`.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface DB {}
+export interface DB {
+  audit_log: AuditLogTable;
+}
 
 /**
  * Executor — общий тип для "обычного" подключения и для транзакции.

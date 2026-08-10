@@ -46,3 +46,7 @@ apps/android/**/build/
 apps/android/**/local.properties
 apps/android/**/.idea/
 apps/android/**/*.iml
+
+# Клиенты, сгенерированные из openapi.json (E01 п. 1.18) — регенерируются
+# командой, источник правды — packages/contracts/openapi.json, он в git есть
+packages/contracts/generated/

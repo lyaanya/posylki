@@ -31,7 +31,6 @@ export function validateEnv(config: Record<string, unknown>): Env {
       .map((issue) => `  - ${issue.path.join(".") || "(корень)"}: ${issue.message}`)
       .join("\n");
 
-    // eslint-disable-next-line no-console
     console.error(
       `Некорректная конфигурация окружения. Проверьте .env (см. .env.example):\n${issues}`,
     );

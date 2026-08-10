@@ -79,7 +79,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
 
       <button
         type="button"
-        className="mt-6 w-full rounded-full bg-primary py-3 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-hover"
+        className="mt-6 w-full rounded-full bg-action py-3 text-sm font-semibold text-on-action transition-colors hover:bg-action-hover"
       >
         {dictionary.listing.respondCta}
       </button>
