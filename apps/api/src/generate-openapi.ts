@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import SwaggerParser from "@apidevtools/swagger-parser";
 import { NestFactory } from "@nestjs/core";
 import { SwaggerModule } from "@nestjs/swagger";
+import prettier from "prettier";
 import { AppModule } from "./app.module.js";
 import { buildOpenApiConfig } from "./openapi-config.js";
 
@@ -21,7 +22,16 @@ async function main(): Promise<void> {
   const currentDir = path.dirname(fileURLToPath(import.meta.url));
   const outPath = path.resolve(currentDir, "../../../packages/contracts/openapi.json");
 
-  await writeFile(outPath, JSON.stringify(document, null, 2) + "\n", "utf8");
+  // Форматируем через Prettier тем же конфигом, что и pnpm format:check —
+  // иначе каждая регенерация отличается от закоммиченного файла только
+  // пробелами, и проверка актуальности (E01 п. 1.26) ложно падает на пустом месте.
+  const prettierConfig = await prettier.resolveConfig(outPath);
+  const formatted = await prettier.format(JSON.stringify(document, null, 2), {
+    ...prettierConfig,
+    parser: "json",
+  });
+
+  await writeFile(outPath, formatted, "utf8");
 
   await SwaggerParser.validate(structuredClone(document) as never);
 
