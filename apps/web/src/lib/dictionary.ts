@@ -70,4 +70,18 @@ export const dictionary = {
   common: {
     verifiedBadge: "проверен",
   },
+  auth: {
+    signInTitle: "вход",
+    signUpTitle: "регистрация",
+    emailLabel: "email",
+    passwordLabel: "пароль",
+    signInCta: "войти",
+    signUpCta: "зарегистрироваться",
+    googleCta: "войти через Google",
+    switchToSignUp: "нет аккаунта? зарегистрироваться",
+    switchToSignIn: "уже есть аккаунт? войти",
+    orDivider: "или",
+    signUpSuccess: "проверьте почту и подтвердите адрес, чтобы войти",
+    genericError: "что-то пошло не так, попробуйте ещё раз",
+  },
 };
