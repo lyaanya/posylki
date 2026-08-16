@@ -22,9 +22,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Версия pnpm не указывается здесь: pnpm/action-setup сам берёт её
+      # из "packageManager" в корневом package.json — так она одна на весь
+      # проект, а не в двух местах, которые могут разойтись.
       - uses: pnpm/action-setup@v4
-        with:
-          version: 11
 
       - uses: actions/setup-node@v4
         with:
