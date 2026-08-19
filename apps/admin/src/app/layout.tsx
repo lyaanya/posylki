@@ -15,8 +15,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "VEZY — админка",
-  description: "Служебная панель модерации сервиса «VEZY»",
+  title: "VEZZY — админка",
+  description: "Служебная панель модерации сервиса «VEZZY»",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${manrope.variable} ${inter.variable} antialiased`}>
         <header className="border-b border-[var(--color-border)] bg-[var(--color-card)] px-6 py-4">
           <span className="font-[family-name:var(--font-heading)] text-lg font-semibold">
-            VEZY · Админка
+            VEZZY · Админка
           </span>
         </header>
         <main className="mx-auto max-w-5xl px-6 py-8">{children}</main>
