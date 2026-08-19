@@ -4,7 +4,7 @@
     {
       "name": "web",
       "runtimeExecutable": "/bin/bash",
-      "runtimeArgs": ["/Users/anna/Projects/Посылки/.claude/dev-web.sh"],
+      "runtimeArgs": ["/Users/anna/Projects/VEZZY/.claude/dev-web.sh"],
       "port": 3002,
       "autoPort": true
     }
