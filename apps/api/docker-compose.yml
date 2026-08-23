@@ -1,0 +1,15 @@
+services:
+  posylki-api:
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile
+    image: posylki-api:latest
+    container_name: posylki-api
+    restart: unless-stopped
+    env_file:
+      - .env
+
+networks:
+  default:
+    name: n8n-docker-caddy_default
+    external: true
