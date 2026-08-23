@@ -22,7 +22,7 @@ export function VerifiedBadge({ compact = false }: VerifiedBadgeProps) {
   if (compact) {
     return (
       <span
-        className="flex size-5 items-center justify-center rounded-full border-2 border-card bg-success text-on-success"
+        className="flex size-5 items-center justify-center rounded-full border-2 border-card bg-primary text-on-primary"
         title={dictionary.common.verifiedBadge}
       >
         <CheckIcon className="size-3" />
@@ -31,7 +31,7 @@ export function VerifiedBadge({ compact = false }: VerifiedBadgeProps) {
   }
 
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2.5 py-1 text-xs font-medium text-success">
+    <span className="inline-flex items-center gap-1 rounded-sm bg-verified-bg px-2.5 py-1 text-xs font-semibold text-verified-fg">
       <CheckIcon className="size-3.5" />
       {dictionary.common.verifiedBadge}
     </span>

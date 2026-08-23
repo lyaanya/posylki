@@ -11,7 +11,7 @@ export default function ProfilePage() {
         {dictionary.profile.title}
       </h1>
 
-      <div className="mt-5 flex items-center gap-4 rounded-lg border border-border bg-card p-4 shadow-sm">
+      <div className="mt-5 flex items-center gap-4 rounded-md border border-border bg-card p-4 shadow-sm">
         <Avatar initials={currentUser.initials} verified={currentUser.verified} size="lg" />
         <div>
           <p className="font-heading text-lg font-semibold text-card-foreground">
@@ -29,13 +29,13 @@ export default function ProfilePage() {
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <div className="rounded-lg border border-border bg-card p-4 text-center shadow-sm">
+        <div className="rounded-md border border-border bg-card p-4 text-center shadow-sm">
           <p className="font-heading text-2xl font-bold text-foreground">
             {currentUser.dealsCount}
           </p>
           <p className="text-sm text-muted-foreground">{dictionary.profile.dealsLabel}</p>
         </div>
-        <div className="rounded-lg border border-border bg-card p-4 text-center shadow-sm">
+        <div className="rounded-md border border-border bg-card p-4 text-center shadow-sm">
           <div className="flex justify-center">
             <RatingStars value={currentUser.rating} />
           </div>
@@ -51,7 +51,7 @@ export default function ProfilePage() {
           {currentUser.frequentRoutes.map((route) => (
             <span
               key={route}
-              className="rounded-full border border-border bg-card px-3 py-1.5 text-sm text-foreground"
+              className="rounded-sm border border-border bg-card px-3 py-1.5 text-sm text-foreground"
             >
               {route}
             </span>
@@ -65,7 +65,7 @@ export default function ProfilePage() {
         </p>
         <div className="flex flex-col gap-3">
           {currentUser.reviews.map((review, i) => (
-            <div key={i} className="rounded-lg border border-border bg-card p-4 shadow-sm">
+            <div key={i} className="rounded-md border border-border bg-card p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-card-foreground">{review.author}</p>
                 <RatingStars value={review.rating} />
@@ -78,7 +78,7 @@ export default function ProfilePage() {
 
       <button
         type="button"
-        className="mt-6 w-full rounded-full border border-border py-3 text-sm font-semibold text-foreground"
+        className="font-heading mt-6 w-full rounded-sm border border-border py-3 text-sm font-bold text-foreground"
       >
         {dictionary.profile.editCta}
       </button>

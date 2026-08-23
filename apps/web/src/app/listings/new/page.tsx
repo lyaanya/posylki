@@ -1,8 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { dictionary } from "@/lib/dictionary";
-import { cities, type ListingType } from "@/lib/mock-data";
+import { type ListingType } from "@/lib/mock-data";
+import { CityPicker } from "@/components/CityPicker";
+import { WeightHint } from "@/components/WeightHint";
+import { AiListingAssist } from "@/components/AiListingAssist";
+import { saveListingDraft } from "@/lib/listing-draft";
 
 const TOTAL_STEPS = 3;
 
@@ -16,11 +22,18 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inputClass =
-  "w-full rounded-lg border border-border bg-card px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
+  "w-full rounded-md border border-border bg-card px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
 
 export default function NewListingPage() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [type, setType] = useState<ListingType>("trip");
+  const [fromCity, setFromCity] = useState("");
+  const [toCity, setToCity] = useState("");
+  const [date, setDate] = useState("");
+  const [weightKg, setWeightKg] = useState("");
+  const [pricePerKg, setPricePerKg] = useState("");
+  const [minPrice, setMinPrice] = useState("");
 
   const next = () => setStep((s) => Math.min(TOTAL_STEPS, s + 1));
   const back = () => setStep((s) => Math.max(1, s - 1));
@@ -43,15 +56,26 @@ export default function NewListingPage() {
         ))}
       </div>
 
-      <div className="mt-6 rounded-lg border border-border bg-card p-4 shadow-sm">
+      <div className="mt-6 rounded-md border border-border bg-card p-4 shadow-sm">
         {step === 1 ? (
           <div className="flex flex-col gap-4">
+            <AiListingAssist
+              onParsed={(data) => {
+                // Черновик собирается на отдельной странице со всеми полями
+                // сразу — распознанные ИИ значения предзаполнены и доступны
+                // для правки, пустые подсвечены (E13 п. 13.26: подтверждение
+                // остаётся за человеком, ничего не публикуется само).
+                saveListingDraft(data);
+                router.push("/listings/draft");
+              }}
+            />
+
             <Field label={dictionary.createListing.typeLabel}>
-              <div className="inline-flex rounded-full border border-border p-1">
+              <div className="inline-flex rounded-sm border border-border p-1">
                 <button
                   type="button"
                   onClick={() => setType("trip")}
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                  className={`font-heading rounded-sm px-4 py-1.5 text-sm font-bold transition-colors ${
                     type === "trip" ? "bg-primary text-on-primary" : "text-muted-foreground"
                   }`}
                 >
@@ -60,7 +84,7 @@ export default function NewListingPage() {
                 <button
                   type="button"
                   onClick={() => setType("request")}
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                  className={`font-heading rounded-sm px-4 py-1.5 text-sm font-bold transition-colors ${
                     type === "request" ? "bg-primary text-on-primary" : "text-muted-foreground"
                   }`}
                 >
@@ -73,23 +97,30 @@ export default function NewListingPage() {
               {dictionary.createListing.routeStepTitle}
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <Field label={dictionary.createListing.fromLabel}>
-                <select className={inputClass} defaultValue={cities[0]}>
-                  {cities.map((city) => (
-                    <option key={city}>{city}</option>
-                  ))}
-                </select>
-              </Field>
-              <Field label={dictionary.createListing.toLabel}>
-                <select className={inputClass} defaultValue={cities[5]}>
-                  {cities.map((city) => (
-                    <option key={city}>{city}</option>
-                  ))}
-                </select>
-              </Field>
+              <div className={inputClass}>
+                <CityPicker
+                  label={dictionary.createListing.fromLabel}
+                  placeholder={dictionary.feed.anyCity}
+                  value={fromCity}
+                  onChange={setFromCity}
+                />
+              </div>
+              <div className={inputClass}>
+                <CityPicker
+                  label={dictionary.createListing.toLabel}
+                  placeholder={dictionary.feed.anyCity}
+                  value={toCity}
+                  onChange={setToCity}
+                />
+              </div>
             </div>
             <Field label={dictionary.createListing.dateLabel}>
-              <input type="date" className={inputClass} />
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className={inputClass}
+              />
             </Field>
           </div>
         ) : null}
@@ -100,14 +131,36 @@ export default function NewListingPage() {
               {dictionary.createListing.detailsStepTitle}
             </p>
             <Field label={dictionary.createListing.weightLabel}>
-              <input type="number" min={0} placeholder="5" className={inputClass} />
+              <input
+                type="number"
+                min={0}
+                placeholder="5"
+                value={weightKg}
+                onChange={(e) => setWeightKg(e.target.value)}
+                className={inputClass}
+              />
+              <WeightHint />
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label={dictionary.createListing.priceStepLabel}>
-                <input type="number" min={0} placeholder="1200" className={inputClass} />
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="1200"
+                  value={pricePerKg}
+                  onChange={(e) => setPricePerKg(e.target.value)}
+                  className={inputClass}
+                />
               </Field>
               <Field label={dictionary.createListing.minPriceStepLabel}>
-                <input type="number" min={0} placeholder="3000" className={inputClass} />
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="3000"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  className={inputClass}
+                />
               </Field>
             </div>
           </div>
@@ -123,7 +176,12 @@ export default function NewListingPage() {
               placeholder={dictionary.createListing.descriptionPlaceholder}
               className={inputClass}
             />
-            <p className="text-xs text-muted-foreground">{dictionary.createListing.aiHint}</p>
+            <Link
+              href="/stop-list"
+              className="text-xs font-semibold text-primary underline decoration-dotted underline-offset-2"
+            >
+              {dictionary.createListing.stopListLink}
+            </Link>
           </div>
         ) : null}
       </div>
@@ -133,7 +191,7 @@ export default function NewListingPage() {
           <button
             type="button"
             onClick={back}
-            className="flex-1 rounded-full border border-border py-3 text-sm font-semibold text-foreground"
+            className="font-heading flex-1 rounded-sm border border-border py-3 text-sm font-bold text-foreground"
           >
             {dictionary.createListing.back}
           </button>
@@ -141,7 +199,7 @@ export default function NewListingPage() {
         <button
           type="button"
           onClick={next}
-          className="flex-1 rounded-full bg-action py-3 text-sm font-semibold text-on-action transition-colors hover:bg-action-hover"
+          className="font-heading flex-1 rounded-sm bg-action py-3 text-sm font-bold text-on-action transition-colors hover:bg-action-hover"
         >
           {step === TOTAL_STEPS ? dictionary.createListing.publish : dictionary.createListing.next}
         </button>

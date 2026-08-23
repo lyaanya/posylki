@@ -31,7 +31,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
         {listing.fromCity} → {listing.toCity}
       </h1>
 
-      <div className="mt-5 rounded-lg border border-border bg-card p-4 shadow-sm">
+      <div className="mt-5 rounded-md border border-border bg-card p-4 shadow-sm">
         <InfoRow
           label={dictionary.listing.datesLabel}
           value={`${listing.dateFrom} – ${listing.dateTo}`}
@@ -39,12 +39,12 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
         <InfoRow label={dictionary.listing.freeWeightLabel} value={`${listing.freeWeightKg} кг`} />
         <InfoRow
           label={dictionary.listing.priceLabel}
-          value={`${listing.pricePerKg} ${listing.currency} / кг, ${dictionary.feed.minPrice.toLowerCase()} ${listing.minPrice} ${listing.currency}`}
+          value={`${listing.pricePerKg} ${listing.currency} / кг, ${dictionary.feed.minPrice} ${listing.minPrice} ${listing.currency}`}
         />
         <InfoRow label={dictionary.listing.storageLabel} value={`${listing.storageDays} дня`} />
       </div>
 
-      <div className="mt-5 rounded-lg border border-border bg-card p-4 shadow-sm">
+      <div className="mt-5 rounded-md border border-border bg-card p-4 shadow-sm">
         <p className="mb-3 text-sm font-medium text-muted-foreground">
           {dictionary.listing.courierLabel}
         </p>
@@ -79,7 +79,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
 
       <button
         type="button"
-        className="mt-6 w-full rounded-full bg-action py-3 text-sm font-semibold text-on-action transition-colors hover:bg-action-hover"
+        className="font-heading mt-6 w-full rounded-sm bg-action py-3 text-sm font-bold text-on-action transition-colors hover:bg-action-hover"
       >
         {dictionary.listing.respondCta}
       </button>

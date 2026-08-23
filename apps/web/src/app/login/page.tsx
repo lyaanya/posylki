@@ -17,7 +17,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inputClass =
-  "w-full rounded-lg border border-border bg-card px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
+  "w-full rounded-md border border-border bg-card px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -84,7 +84,7 @@ export default function LoginPage() {
         {mode === "signIn" ? dictionary.auth.signInTitle : dictionary.auth.signUpTitle}
       </h1>
 
-      <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+      <div className="rounded-md border border-border bg-card p-4 shadow-sm">
         <form className="flex flex-col gap-4" onSubmit={handleEmailAuth}>
           <Field label={dictionary.auth.emailLabel}>
             <input
@@ -115,7 +115,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-action px-4 py-2.5 text-sm font-medium text-on-action transition-colors hover:bg-action-hover disabled:opacity-60"
+            className="font-heading rounded-sm bg-action px-4 py-2.5 text-sm font-bold text-on-action transition-colors hover:bg-action-hover disabled:opacity-60"
           >
             {mode === "signIn" ? dictionary.auth.signInCta : dictionary.auth.signUpCta}
           </button>
@@ -142,7 +142,7 @@ export default function LoginPage() {
         <button
           type="button"
           onClick={handleGoogle}
-          className="w-full rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          className="font-heading w-full rounded-sm border border-border bg-card px-4 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-muted"
         >
           {dictionary.auth.googleCta}
         </button>

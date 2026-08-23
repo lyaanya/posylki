@@ -1,25 +1,27 @@
 export function Logo({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 320 128" className={className} aria-hidden="true">
+    <svg viewBox="0 0 170 60" className={className} aria-hidden="true">
       <text
-        x="4"
-        y="84"
-        fontFamily="MorfinSans, var(--font-manrope), sans-serif"
+        x="0"
+        y="38"
+        fontFamily="var(--font-heading)"
         fontWeight="800"
-        fontSize="130"
-        letterSpacing="-2"
-        fill="currentColor"
+        fontSize="34"
+        letterSpacing="-1"
+        fill="var(--color-foreground)"
       >
         VEZZY
       </text>
       <path
-        d="M6 102 C 92 122, 224 118, 302 94"
+        d="M6 50 C 60 62, 120 58, 160 44"
         fill="none"
-        stroke="currentColor"
-        strokeWidth="3"
+        stroke="var(--color-foreground)"
+        strokeWidth="2.4"
         strokeLinecap="round"
       />
-      <circle cx="302" cy="94" r="6" fill="currentColor" />
+      {/* Акцент логотипа — точный цвет из утверждённого брендборда (раунд 6),
+          отдельный от приглушённого --color-action, который используют кнопки. */}
+      <circle cx="160" cy="44" r="4.5" fill="#D82961" />
     </svg>
   );
 }
