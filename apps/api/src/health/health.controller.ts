@@ -1,6 +1,7 @@
 import { Controller, Get, HttpStatus, Inject, Res } from "@nestjs/common";
 import type { Response } from "express";
 import { sql, type Kysely } from "kysely";
+import { Public } from "../auth/public.decorator.js";
 import type { DB } from "../database/database.js";
 import { DATABASE } from "../database/database.module.js";
 
@@ -14,6 +15,7 @@ interface HealthResponse {
 export class HealthController {
   constructor(@Inject(DATABASE) private readonly db: Kysely<DB>) {}
 
+  @Public()
   @Get()
   async check(@Res() res: Response): Promise<void> {
     const database = await this.checkDatabase();

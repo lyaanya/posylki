@@ -1,6 +1,21 @@
 import { Kysely, PostgresDialect, type Transaction } from "kysely";
 import { Pool } from "pg";
 import type { AuditLogTable } from "../audit-log/audit-log.types.js";
+import type {
+  LegalConsentsTable,
+  LegalDocumentsTable,
+  UserSessionsTable,
+  UsersTable,
+} from "../auth/auth.types.js";
+import type {
+  CitiesTable,
+  CurrenciesTable,
+  DocumentTypesTable,
+  StopListItemsTable,
+  WeightReferencesTable,
+} from "../directories/directories.types.js";
+import type { AdminUsersTable } from "../admin/admin.types.js";
+import type { AiRequestsTable } from "../ai/ai.types.js";
 
 /**
  * Схема базы, дополняется по мере появления таблиц в каждом эпике —
@@ -8,6 +23,17 @@ import type { AuditLogTable } from "../audit-log/audit-log.types.js";
  */
 export interface DB {
   audit_log: AuditLogTable;
+  users: UsersTable;
+  legal_documents: LegalDocumentsTable;
+  legal_consents: LegalConsentsTable;
+  user_sessions: UserSessionsTable;
+  cities: CitiesTable;
+  currencies: CurrenciesTable;
+  weight_references: WeightReferencesTable;
+  stop_list_items: StopListItemsTable;
+  document_types: DocumentTypesTable;
+  admin_users: AdminUsersTable;
+  ai_requests: AiRequestsTable;
 }
 
 /**

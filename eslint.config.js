@@ -11,8 +11,6 @@ export default tseslint.config(
       "**/.next/**",
       "**/node_modules/**",
       "**/coverage/**",
-      "apps/ios/**",
-      "apps/android/**",
       "packages/contracts/generated/**",
       "**/next-env.d.ts",
     ],

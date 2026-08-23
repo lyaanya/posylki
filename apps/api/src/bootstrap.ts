@@ -13,6 +13,10 @@ import { AllExceptionsFilter } from "./common/all-exceptions.filter.js";
  */
 export function configureApp(app: INestApplication): void {
   app.useLogger(app.get(Logger));
+  // Клиенты (web, admin, мобильное приложение) ходят напрямую с браузера/
+  // устройства без cookie-сессии (авторизация — Bearer-токен в заголовке),
+  // поэтому открытый CORS не создаёт CSRF-риска.
+  app.enableCors();
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalPipes(
     new ValidationPipe({

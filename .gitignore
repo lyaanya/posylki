@@ -35,17 +35,16 @@ pnpm-debug.log*
 # Coverage
 coverage/
 
-# iOS
-apps/ios/**/xcuserdata/
-apps/ios/**/DerivedData/
-apps/ios/**/*.xcuserstate
-
-# Android
-apps/android/**/.gradle/
-apps/android/**/build/
-apps/android/**/local.properties
-apps/android/**/.idea/
-apps/android/**/*.iml
+# React Native (Expo) — apps/mobile
+apps/mobile/.expo/
+apps/mobile/**/.expo/
+apps/mobile/ios/
+apps/mobile/android/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
 
 # Клиенты, сгенерированные из openapi.json (E01 п. 1.18) — регенерируются
 # командой, источник правды — packages/contracts/openapi.json, он в git есть

@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Генерирует типизированные клиенты для трёх платформ из openapi.json
-# (E01 п. 1.18). Один инструмент (openapi-generator-cli) на все три языка —
-# проще поддерживать одну команду, чем три разных тулчейна.
+# Генерирует TypeScript-клиент из openapi.json (E01 п. 1.18).
+# Один клиент для web, admin и мобильного приложения (React Native).
 #
 # Установка: brew install openapi-generator
 
@@ -25,28 +24,12 @@ fi
 rm -rf "$OUT_DIR"
 mkdir -p "$OUT_DIR"
 
-echo "== TypeScript (typescript-fetch) — для web и admin =="
+echo "== TypeScript (typescript-fetch) — для web, admin и мобильного приложения =="
 openapi-generator generate \
   -i "$SPEC" \
   -g typescript-fetch \
   -o "$OUT_DIR/typescript" \
   --additional-properties=npmName=@posylki/api-client,supportsES6=true \
-  --global-property=apiTests=false,modelTests=false,apiDocs=false,modelDocs=false
-
-echo "== Swift (swift6) — для iOS =="
-openapi-generator generate \
-  -i "$SPEC" \
-  -g swift6 \
-  -o "$OUT_DIR/swift" \
-  --additional-properties=projectName=PosylkiAPIClient \
-  --global-property=apiTests=false,modelTests=false,apiDocs=false,modelDocs=false
-
-echo "== Kotlin — для Android =="
-openapi-generator generate \
-  -i "$SPEC" \
-  -g kotlin \
-  -o "$OUT_DIR/kotlin" \
-  --additional-properties=packageName=ru.posylki.apiclient \
   --global-property=apiTests=false,modelTests=false,apiDocs=false,modelDocs=false
 
 echo "Готово: $OUT_DIR"
