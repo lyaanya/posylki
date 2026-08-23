@@ -44,6 +44,9 @@ cp .env.example .env
 - `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_KEY` — там же
 - `SUPABASE_DB_URL` — Project Settings → Database → Connection string →
   **Transaction pooler**, с подставленным паролем от базы
+- `GROQ_API_KEY` — необязателен: без него ИИ-сервис (разбор свободного
+  текста объявления, E13) отвечает сбоем, но не роняет приложение.
+  Бесплатный ключ — console.groq.com → API Keys
 
 ### 3. Настроить окружение веб-приложения
 
@@ -52,9 +55,12 @@ cp .env.example .env
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxxxxxxxxxxxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
-Значения те же, что `SUPABASE_URL`/`SUPABASE_ANON_KEY` из `.env`.
+Первые два значения те же, что `SUPABASE_URL`/`SUPABASE_ANON_KEY` из `.env`.
+`NEXT_PUBLIC_API_URL` — адрес `apps/api`, локально всегда `http://localhost:3000`;
+без него не заработают справочники (города, стоп-лист) и ИИ-разбор текста.
 
 ### 4. Применить миграции базы данных
 
@@ -123,3 +129,11 @@ docs/tz/      техническое задание по эпикам
 
 - Мобильное приложение (React Native + Expo, задача 1.11 в [epic-01](docs/tz/epic-01-foundation.md))
   пока не реализовано — сфокусировались на web.
+- Бэкенд объявлений и сделок (E07, E10) ещё не реализован: создание
+  объявления на вебе — визуальная демонстрация с ИИ-разбором текста,
+  ничего не сохраняется в базу. Экраны создания/черновика/публикации
+  собраны так, чтобы их было легко подключить к реальному API позже.
+- `apps/admin` — только каркас Next.js, без интерфейса под уже готовый
+  API справочников (`/admin/directories/*`, E05 п. 5.6).
+- Вход через Apple/Telegram (E03 п. 3.3) не настроен — нужны реальные
+  учётные данные провайдеров, ещё не заведены.
