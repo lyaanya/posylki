@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import { listings } from "@/lib/mock-data";
+import { fetchListing } from "@/lib/listings";
 import { dictionary } from "@/lib/dictionary";
+import { formatDate } from "@/lib/format-date";
 import { Avatar } from "@/components/Avatar";
 import { RatingStars } from "@/components/RatingStars";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -16,7 +17,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 export default async function ListingPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const listing = listings.find((item) => item.id === id);
+  const listing = await fetchListing(id);
 
   if (!listing) {
     notFound();
@@ -32,17 +33,20 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
       </h1>
 
       <div className="mt-5 rounded-md border border-border bg-card p-4 shadow-sm">
-        <InfoRow
-          label={dictionary.listing.datesLabel}
-          value={`${listing.dateFrom} – ${listing.dateTo}`}
-        />
+        <InfoRow label={dictionary.listing.datesLabel} value={formatDate(listing.date)} />
         <InfoRow label={dictionary.listing.freeWeightLabel} value={`${listing.freeWeightKg} кг`} />
         <InfoRow
           label={dictionary.listing.priceLabel}
           value={`${listing.pricePerKg} ${listing.currency} / кг, ${dictionary.feed.minPrice} ${listing.minPrice} ${listing.currency}`}
         />
-        <InfoRow label={dictionary.listing.storageLabel} value={`${listing.storageDays} дня`} />
       </div>
+
+      {listing.description ? (
+        <div className="mt-5 rounded-md border border-border bg-card p-4 shadow-sm">
+          <p className="text-sm text-muted-foreground">{dictionary.listing.descriptionLabel}</p>
+          <p className="mt-1.5 text-sm text-foreground">{listing.description}</p>
+        </div>
+      ) : null}
 
       <div className="mt-5 rounded-md border border-border bg-card p-4 shadow-sm">
         <p className="mb-3 text-sm font-medium text-muted-foreground">

@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { dictionary } from "@/lib/dictionary";
-import { listings, type ListingType } from "@/lib/mock-data";
+import { fetchListings, type Listing, type ListingType } from "@/lib/listings";
 import { ListingCard } from "@/components/ListingCard";
 import { CityPicker } from "@/components/CityPicker";
 
@@ -10,6 +10,28 @@ export default function FeedPage() {
   const [tab, setTab] = useState<ListingType>("trip");
   const [fromQuery, setFromQuery] = useState("");
   const [toQuery, setToQuery] = useState("");
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchListings()
+      .then((data) => {
+        if (!cancelled) setListings(data);
+      })
+      .catch(() => {
+        if (!cancelled) setHasError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     return listings
@@ -24,7 +46,7 @@ export default function FeedPage() {
         return matchesTab && matchesFrom && matchesTo;
       })
       .sort((a, b) => b.courier.rating - a.courier.rating);
-  }, [tab, fromQuery, toQuery]);
+  }, [listings, tab, fromQuery, toQuery]);
 
   return (
     <div>
@@ -104,7 +126,16 @@ export default function FeedPage() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div className="mt-4 rounded-md border border-border bg-card px-4 py-10 text-center">
+          <p className="text-sm text-muted-foreground">{dictionary.feed.loading}</p>
+        </div>
+      ) : hasError ? (
+        <div className="mt-4 rounded-md border border-border bg-card px-4 py-10 text-center">
+          <p className="font-medium text-foreground">{dictionary.feed.errorTitle}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{dictionary.feed.errorHint}</p>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="mt-4 rounded-md border border-border bg-card px-4 py-10 text-center">
           <p className="font-medium text-foreground">{dictionary.feed.emptyTitle}</p>
           <p className="mt-1 text-sm text-muted-foreground">{dictionary.feed.emptyHint}</p>

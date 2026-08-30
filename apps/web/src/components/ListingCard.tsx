@@ -1,6 +1,7 @@
 import Link from "next/link";
-import type { Listing } from "@/lib/mock-data";
+import type { Listing } from "@/lib/listings";
 import { dictionary } from "@/lib/dictionary";
+import { formatDate } from "@/lib/format-date";
 
 function RouteArrow() {
   return (
@@ -55,7 +56,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
         <div className="text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
           {dictionary.listing.datesLabel}
           <span className="mt-0.5 block text-[13px] font-semibold text-foreground normal-case">
-            {listing.dateFrom} – {listing.dateTo}
+            {formatDate(listing.date)}
           </span>
         </div>
         <div className="text-right text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">

@@ -1,4 +1,4 @@
-import type { ListingType } from "./mock-data";
+import type { ListingType } from "./listings";
 import type { ParsedListingText } from "./ai";
 
 const DRAFT_KEY = "vezzy-listing-draft";

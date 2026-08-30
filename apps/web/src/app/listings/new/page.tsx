@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { dictionary } from "@/lib/dictionary";
-import { type ListingType } from "@/lib/mock-data";
+import { type ListingType } from "@/lib/listings";
 import { CityPicker } from "@/components/CityPicker";
 import { WeightHint } from "@/components/WeightHint";
 import { AiListingAssist } from "@/components/AiListingAssist";
