@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { dictionary } from "@/lib/dictionary";
-import { type ListingType } from "@/lib/listings";
+import { createListing, type ListingType } from "@/lib/listings";
+import { resolveCityId } from "@/lib/directories";
 import { CityPicker } from "@/components/CityPicker";
 import { WeightHint } from "@/components/WeightHint";
 import { loadListingDraft, savePublishedListing } from "@/lib/listing-draft";
@@ -44,10 +45,11 @@ function DraftField({
 }
 
 /**
- * Черновик объявления (визуальная демонстрация E13, сценарий 3): все поля
- * сразу на одной странице, вместо трёх шагов мастера — распознанные ИИ
- * значения предзаполнены и редактируемы, пустые подсвечены. Ничего не
- * сохраняется в базу — бэкенда объявлений (E07) ещё нет.
+ * Черновик объявления: все поля сразу на одной странице — общий финальный
+ * шаг и для ИИ-разбора (E13, сценарий 3, п. 13.26: результат всегда
+ * подтверждает человек), и для ручного мастера. Распознанные или введённые
+ * значения предзаполнены и редактируемы, пустые подсвечены. Публикация
+ * реально сохраняет объявление через apps/api (E07, демо-срез).
  */
 export default function ListingDraftPage() {
   const router = useRouter();
@@ -60,6 +62,8 @@ export default function ListingDraftPage() {
   const [minPrice, setMinPrice] = useState("");
   const [description, setDescription] = useState("");
   const [isReady, setIsReady] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
 
   useEffect(() => {
     const draft = loadListingDraft();
@@ -71,6 +75,7 @@ export default function ListingDraftPage() {
       if (draft.weightKg != null) setWeightKg(String(draft.weightKg));
       if (draft.pricePerKg != null) setPricePerKg(String(draft.pricePerKg));
       if (draft.minPrice != null) setMinPrice(String(draft.minPrice));
+      if (draft.description) setDescription(draft.description);
     }
     setIsReady(true);
   }, []);
@@ -206,26 +211,60 @@ export default function ListingDraftPage() {
         </Link>
       </div>
 
+      {publishError ? (
+        <p className="mt-3 text-sm font-medium text-destructive">{publishError}</p>
+      ) : null}
+
       <button
         type="button"
-        onClick={() => {
-          if (missingCount > 0) return;
-          savePublishedListing({
-            type,
-            fromCity,
-            toCity,
-            date,
-            weightKg,
-            pricePerKg,
-            minPrice,
-            description,
-          });
-          router.push("/listings/published");
+        onClick={async () => {
+          if (missingCount > 0 || isPublishing) return;
+          setPublishError(null);
+          setIsPublishing(true);
+
+          try {
+            const [fromCityId, toCityId] = await Promise.all([
+              resolveCityId(fromCity),
+              resolveCityId(toCity),
+            ]);
+            if (!fromCityId || !toCityId) {
+              setPublishError(dictionary.createListing.publishCityError);
+              return;
+            }
+
+            const created = await createListing({
+              type,
+              fromCityId,
+              toCityId,
+              date,
+              freeWeightKg: Number(weightKg),
+              pricePerKg: Number(pricePerKg),
+              minPrice: Number(minPrice),
+              description,
+            });
+
+            savePublishedListing({
+              id: created.id,
+              type,
+              fromCity,
+              toCity,
+              date,
+              weightKg,
+              pricePerKg,
+              minPrice,
+              description,
+            });
+            router.push("/listings/published");
+          } catch {
+            setPublishError(dictionary.createListing.publishError);
+          } finally {
+            setIsPublishing(false);
+          }
         }}
-        disabled={missingCount > 0}
+        disabled={missingCount > 0 || isPublishing}
         className="font-heading mt-5 w-full rounded-sm bg-action py-3 text-sm font-bold text-on-action transition-colors hover:bg-action-hover disabled:opacity-40"
       >
-        {dictionary.createListing.publish}
+        {isPublishing ? dictionary.createListing.publishing : dictionary.createListing.publish}
       </button>
     </div>
   );

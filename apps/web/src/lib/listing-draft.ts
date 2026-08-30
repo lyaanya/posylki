@@ -5,28 +5,32 @@ const DRAFT_KEY = "vezzy-listing-draft";
 const PUBLISHED_KEY = "vezzy-listing-published";
 
 /**
- * Передаёт результат разбора текста (E13, сценарий 3) со страницы создания
- * объявления на страницу черновика. Только sessionStorage — реального
- * сохранения объявлений ещё нет (бэкенд E07 не реализован), это визуальная
- * демонстрация разбора текста, не публикация.
+ * Черновик до подтверждения человеком (E13 п. 13.26) — либо от ИИ-разбора
+ * (числовые поля, без описания), либо из ручного мастера (строки, как
+ * вводит пользователь, уже с описанием). Страница черновика приводит оба
+ * варианта к одному виду.
  */
-export function saveListingDraft(data: ParsedListingText): void {
+export type ListingDraftInput = Partial<ParsedListingText> & { description?: string | null };
+
+/** Передаёт черновик (от ИИ-разбора или из ручного мастера) на страницу черновика. */
+export function saveListingDraft(data: ListingDraftInput): void {
   sessionStorage.setItem(DRAFT_KEY, JSON.stringify(data));
 }
 
-export function loadListingDraft(): ParsedListingText | null {
+export function loadListingDraft(): ListingDraftInput | null {
   const raw = sessionStorage.getItem(DRAFT_KEY);
   if (!raw) {
     return null;
   }
   try {
-    return JSON.parse(raw) as ParsedListingText;
+    return JSON.parse(raw) as ListingDraftInput;
   } catch {
     return null;
   }
 }
 
 export interface ListingDraftFields {
+  id?: string;
   type: ListingType;
   fromCity: string;
   toCity: string;
@@ -37,7 +41,7 @@ export interface ListingDraftFields {
   description: string;
 }
 
-/** Финальные поля черновика — со страницы черновика на страницу «опубликовано». */
+/** Финальные поля опубликованного объявления — со страницы черновика на страницу «опубликовано». */
 export function savePublishedListing(data: ListingDraftFields): void {
   sessionStorage.setItem(PUBLISHED_KEY, JSON.stringify(data));
 }

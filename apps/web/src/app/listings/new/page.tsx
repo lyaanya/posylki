@@ -34,9 +34,19 @@ export default function NewListingPage() {
   const [weightKg, setWeightKg] = useState("");
   const [pricePerKg, setPricePerKg] = useState("");
   const [minPrice, setMinPrice] = useState("");
+  const [description, setDescription] = useState("");
 
-  const next = () => setStep((s) => Math.min(TOTAL_STEPS, s + 1));
   const back = () => setStep((s) => Math.max(1, s - 1));
+
+  function handlePrimaryAction() {
+    if (step < TOTAL_STEPS) {
+      setStep((s) => Math.min(TOTAL_STEPS, s + 1));
+      return;
+    }
+
+    saveListingDraft({ type, fromCity, toCity, date, weightKg: Number(weightKg) || null, pricePerKg: Number(pricePerKg) || null, minPrice: Number(minPrice) || null, description });
+    router.push("/listings/draft");
+  }
 
   return (
     <div className="py-6">
@@ -174,6 +184,8 @@ export default function NewListingPage() {
             <textarea
               rows={5}
               placeholder={dictionary.createListing.descriptionPlaceholder}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               className={inputClass}
             />
             <Link
@@ -198,10 +210,10 @@ export default function NewListingPage() {
         ) : null}
         <button
           type="button"
-          onClick={next}
+          onClick={handlePrimaryAction}
           className="font-heading flex-1 rounded-sm bg-action py-3 text-sm font-bold text-on-action transition-colors hover:bg-action-hover"
         >
-          {step === TOTAL_STEPS ? dictionary.createListing.publish : dictionary.createListing.next}
+          {step === TOTAL_STEPS ? dictionary.createListing.reviewCta : dictionary.createListing.next}
         </button>
       </div>
     </div>

@@ -1,4 +1,7 @@
 import { apiGet } from "./api";
+import { createSupabaseBrowserClient } from "./supabase-client";
+
+const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3000";
 
 /** Формы совпадают с camelCase-ответом /listings (apps/api/src/listings). */
 export type ListingType = "trip" | "request";
@@ -48,4 +51,63 @@ export function fetchListings(filter: ListingFilter = {}): Promise<Listing[]> {
 
 export function fetchListing(id: string): Promise<Listing | null> {
   return apiGet<Listing>(`/listings/${id}`).catch(() => null);
+}
+
+export interface CreateListingInput {
+  type: ListingType;
+  fromCityId: string;
+  toCityId: string;
+  date: string;
+  freeWeightKg: number;
+  pricePerKg: number;
+  minPrice: number;
+  description: string;
+}
+
+/** Требует вход — та же сессия Supabase Auth, что и для ИИ-разбора (lib/ai.ts). */
+export async function createListing(input: CreateListingInput): Promise<Listing> {
+  const supabase = createSupabaseBrowserClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    throw new Error("Нужно войти в аккаунт");
+  }
+
+  const response = await fetch(`${API_URL}/listings`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    throw new Error(`API /listings ответил ${response.status}`);
+  }
+
+  return (await response.json()) as Listing;
+}
+
+export async function fetchMyListings(): Promise<Listing[]> {
+  const supabase = createSupabaseBrowserClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    return [];
+  }
+
+  const response = await fetch(`${API_URL}/listings/mine`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  });
+
+  if (!response.ok) {
+    return [];
+  }
+
+  return (await response.json()) as Listing[];
 }

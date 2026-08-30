@@ -34,6 +34,21 @@ export function searchCities(query: string): Promise<City[]> {
   return apiGet<City[]>(`/directories/cities${q ? `?q=${encodeURIComponent(q)}` : ""}`);
 }
 
+/**
+ * CityPicker хранит только отображаемое имя города (E05), а не его id —
+ * этот id нужен только в момент отправки формы (создание объявления),
+ * поэтому находим его по имени здесь, а не храним заранее.
+ */
+export async function resolveCityId(nameRu: string): Promise<string | null> {
+  const trimmed = nameRu.trim();
+  if (!trimmed) {
+    return null;
+  }
+  const results = await searchCities(trimmed);
+  const exact = results.find((city) => city.nameRu === trimmed);
+  return (exact ?? results[0])?.id ?? null;
+}
+
 export function fetchWeightReferences(): Promise<WeightReference[]> {
   return apiGet<WeightReference[]>("/directories/weight-references");
 }

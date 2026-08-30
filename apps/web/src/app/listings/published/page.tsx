@@ -15,10 +15,10 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 }
 
 /**
- * Экран после «опубликовать» на черновике — визуальная демонстрация, без
- * реального сохранения (бэкенда объявлений, E07, ещё нет). Дальше — в ленту,
- * это самое естественное продолжение: там курьер сразу видит, как объявление
- * выглядит среди остальных.
+ * Экран после «опубликовать» на черновике — объявление уже реально
+ * сохранено (draft/page.tsx вызывает apps/api перед переходом сюда).
+ * Дальше — в ленту, это самое естественное продолжение: там курьер сразу
+ * видит, как объявление выглядит среди остальных.
  */
 export default function ListingPublishedPage() {
   const [listing, setListing] = useState<ListingDraftFields | null>(null);
@@ -100,9 +100,21 @@ export default function ListingPublishedPage() {
         </div>
       </div>
 
+      {listing.id ? (
+        <Link
+          href={`/listings/${listing.id}`}
+          className="font-heading mt-6 block w-full rounded-sm bg-action py-3 text-sm font-bold text-on-action transition-colors hover:bg-action-hover"
+        >
+          {dictionary.createListing.publishedViewCta}
+        </Link>
+      ) : null}
       <Link
         href="/"
-        className="font-heading mt-6 block w-full rounded-sm bg-action py-3 text-sm font-bold text-on-action transition-colors hover:bg-action-hover"
+        className={
+          listing.id
+            ? "mt-3 block text-sm font-semibold text-primary underline decoration-dotted underline-offset-2"
+            : "font-heading mt-6 block w-full rounded-sm bg-action py-3 text-sm font-bold text-on-action transition-colors hover:bg-action-hover"
+        }
       >
         {dictionary.createListing.publishedGoToFeed}
       </Link>
