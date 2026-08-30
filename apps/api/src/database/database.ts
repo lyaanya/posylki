@@ -16,6 +16,7 @@ import type {
 } from "../directories/directories.types.js";
 import type { AdminUsersTable } from "../admin/admin.types.js";
 import type { AiRequestsTable } from "../ai/ai.types.js";
+import type { ListingsTable } from "../listings/listings.types.js";
 
 /**
  * Схема базы, дополняется по мере появления таблиц в каждом эпике —
@@ -34,6 +35,7 @@ export interface DB {
   document_types: DocumentTypesTable;
   admin_users: AdminUsersTable;
   ai_requests: AiRequestsTable;
+  listings: ListingsTable;
 }
 
 /**

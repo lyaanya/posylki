@@ -10,6 +10,7 @@ import { validateEnv } from "./config/env.js";
 import { DatabaseModule } from "./database/database.module.js";
 import { DirectoriesModule } from "./directories/directories.module.js";
 import { HealthModule } from "./health/health.module.js";
+import { ListingsModule } from "./listings/listings.module.js";
 import { LoggerModule } from "./logging/logger.module.js";
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
@@ -35,6 +36,7 @@ const rootEnvFilePath = path.resolve(currentDir, "../../../.env");
     AdminModule,
     DirectoriesModule,
     AiModule,
+    ListingsModule,
     HealthModule,
   ],
 })
