@@ -2,41 +2,172 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { dictionary } from "@/lib/dictionary";
-import { currentUser } from "@/lib/mock-data";
-import { fetchMyListings, type Listing } from "@/lib/listings";
+import { fetchMyListings, hideListing, unhideListing, type Listing } from "@/lib/listings";
+import { fetchMyProfile, setReferral, updateMyProfile, uploadMyAvatar, type OwnProfile } from "@/lib/profile";
+import { resolveCityId } from "@/lib/directories";
 import { formatDate } from "@/lib/format-date";
-import { createSupabaseBrowserClient } from "@/lib/supabase-client";
+import { signOut, useSession } from "@/lib/auth";
+import { initials } from "@/lib/initials";
+import { clearPendingReferrer, getPendingReferrerId } from "@/lib/referral";
+import { ProfileSummary } from "@/components/ProfileSummary";
+import { ReviewsSection } from "@/components/ReviewsSection";
+import { CityPicker } from "@/components/CityPicker";
 import { Avatar } from "@/components/Avatar";
-import { RatingStars } from "@/components/RatingStars";
-import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { InviteLinkCard } from "@/components/InviteLinkCard";
+import { SubscriptionsSection } from "@/components/SubscriptionsSection";
 
 /**
- * Имя, город, рейтинг и отзывы — пока моки: у E06 (профиль) и E11 (отзывы)
- * ещё нет бэкенда. «Мои объявления» ниже — уже реальные данные (E07,
- * демо-срез), поэтому получены отдельно, не из currentUser.
+ * Свой профиль (E06 п. 6.8-6.11): фото, текст о себе, город и телефон
+ * редактируются; имя и фамилия по-хорошему приходят из верификации (E04),
+ * которая в этой итерации не реализована — см. profile.types.ts на бэкенде
+ * для того же решения. Рейтинг/сделки/маршруты общие с публичным профилем
+ * через ProfileSummary — до E10/E11 они всегда пустые.
  */
 export default function ProfilePage() {
+  const router = useRouter();
+  const session = useSession();
   const [myListings, setMyListings] = useState<Listing[]>([]);
-  const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null);
+  const [profile, setProfile] = useState<OwnProfile | null>(null);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [aboutInput, setAboutInput] = useState("");
+  const [cityInput, setCityInput] = useState("");
+  const [phoneInput, setPhoneInput] = useState("");
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [togglingListingId, setTogglingListingId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (session.status !== "signedIn") return;
     let cancelled = false;
-    const supabase = createSupabaseBrowserClient();
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    fetchMyProfile().then(async (p) => {
       if (cancelled) return;
-      setIsSignedIn(session != null);
-      if (!session) return;
-      fetchMyListings().then((listings) => {
-        if (!cancelled) setMyListings(listings);
-      });
+      // Одноразовый перенос имени из метаданных Google (см. lib/auth.ts) в
+      // настоящий профиль — до этой правки имя жило только там.
+      if (!p.displayName && session.displayName) {
+        try {
+          p = await updateMyProfile({ displayName: session.displayName });
+        } catch {
+          // Не критично — просто останется как есть, поле редактируемо руками.
+        }
+      }
+      // ТЗ E08 п.8.17: если пришли по чужой ссылке-приглашению и ещё не
+      // записаны ничьим приглашённым — фиксируем сейчас, раз уже есть сессия.
+      const pendingReferrerId = getPendingReferrerId();
+      if (!p.referredById && pendingReferrerId && pendingReferrerId !== p.id) {
+        try {
+          p = await setReferral(pendingReferrerId);
+        } catch {
+          // Не критично — ссылка могла оказаться на несуществующего пользователя.
+        } finally {
+          clearPendingReferrer();
+        }
+      } else if (pendingReferrerId) {
+        clearPendingReferrer();
+      }
+      if (!cancelled) setProfile(p);
+    }).catch(() => {
+      // Ничего не делаем: например, ACCOUNT_BLOCKED — AccountStatusGate
+      // уже покажет полноэкранный статус блокировки поверх этой страницы.
+    });
+    fetchMyListings().catch(() => []).then((listings) => {
+      if (!cancelled) setMyListings(listings);
     });
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [session.status]);
+
+  if (session.status === "loading") {
+    return null;
+  }
+
+  if (session.status === "signedOut") {
+    return (
+      <div className="py-6">
+        <h1 className="font-heading text-2xl font-bold text-foreground">
+          {dictionary.profile.title}
+        </h1>
+        <div className="mt-5 rounded-md border border-border bg-card p-5 text-center shadow-sm">
+          <p className="text-sm text-muted-foreground">{dictionary.profile.myListingsSignInHint}</p>
+          <Link
+            href="/login"
+            className="font-heading mt-4 inline-block rounded-sm bg-action px-5 py-2.5 text-sm font-bold text-on-action transition-colors hover:bg-action-hover"
+          >
+            {dictionary.auth.signInCta}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return null;
+  }
+
+  function startEditing() {
+    if (!profile) return;
+    setNameInput(profile.displayName ?? "");
+    setAboutInput(profile.aboutText ?? "");
+    setCityInput(profile.city ?? "");
+    setPhoneInput(profile.phone ?? "");
+    setIsEditing(true);
+  }
+
+  async function handleAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = ""; // позволяет выбрать тот же файл ещё раз при ошибке
+    if (!file) return;
+
+    setAvatarError(null);
+    setIsUploadingAvatar(true);
+    try {
+      const updated = await uploadMyAvatar(file);
+      setProfile(updated);
+    } catch {
+      setAvatarError(dictionary.profile.avatarUploadError);
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  }
+
+  async function handleToggleVisibility(listing: Listing) {
+    setTogglingListingId(listing.id);
+    try {
+      const updated =
+        listing.status === "published" ? await hideListing(listing.id) : await unhideListing(listing.id);
+      setMyListings((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
+    } finally {
+      setTogglingListingId(null);
+    }
+  }
+
+  async function saveProfile() {
+    setIsSaving(true);
+    try {
+      let cityId: string | null | undefined = undefined;
+      if (cityInput.trim() !== (profile?.city ?? "")) {
+        cityId = cityInput.trim() ? await resolveCityId(cityInput.trim()) : null;
+      }
+
+      const updated = await updateMyProfile({
+        displayName: nameInput.trim() || null,
+        aboutText: aboutInput.trim() || null,
+        phone: phoneInput.trim() || null,
+        ...(cityId !== undefined ? { cityId } : {}),
+      });
+      setProfile(updated);
+      setIsEditing(false);
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   return (
     <div className="py-6">
@@ -44,109 +175,179 @@ export default function ProfilePage() {
         {dictionary.profile.title}
       </h1>
 
-      <div className="mt-5 flex items-center gap-4 rounded-md border border-border bg-card p-4 shadow-sm">
-        <Avatar initials={currentUser.initials} verified={currentUser.verified} size="lg" />
-        <div>
-          <p className="font-heading text-lg font-semibold text-card-foreground">
-            {currentUser.name}
-          </p>
-          <p className="text-sm text-muted-foreground">{currentUser.city}</p>
-          <div className="mt-1.5">
-            {currentUser.verified ? (
-              <VerifiedBadge />
-            ) : (
-              <span className="text-xs text-muted-foreground">{dictionary.profile.pending}</span>
-            )}
-          </div>
-        </div>
-      </div>
+      <div className="mt-5">
+        {isEditing ? (
+          <div className="rounded-md border border-border bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-4">
+              <Avatar
+                initials={initials(profile.displayName ?? "?")}
+                imageUrl={profile.avatarUrl}
+                size="lg"
+              />
+              <label className="font-heading cursor-pointer rounded-sm border border-border px-3.5 py-2 text-sm font-bold text-foreground transition-colors hover:bg-muted">
+                {isUploadingAvatar ? dictionary.profile.avatarUploading : dictionary.profile.changePhotoCta}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  disabled={isUploadingAvatar}
+                  onChange={handleAvatarChange}
+                />
+              </label>
+            </div>
+            {avatarError ? <p className="mt-2 text-sm text-destructive">{avatarError}</p> : null}
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <div className="rounded-md border border-border bg-card p-4 text-center shadow-sm">
-          <p className="font-heading text-2xl font-bold text-foreground">
-            {currentUser.dealsCount}
-          </p>
-          <p className="text-sm text-muted-foreground">{dictionary.profile.dealsLabel}</p>
-        </div>
-        <div className="rounded-md border border-border bg-card p-4 text-center shadow-sm">
-          <div className="flex justify-center">
-            <RatingStars value={currentUser.rating} />
+            <label className="mt-4 block">
+              <span className="mb-1.5 block text-sm font-medium text-foreground">
+                {dictionary.profile.namePlaceholder}
+              </span>
+              <input
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                placeholder={dictionary.profile.namePlaceholder}
+                className="w-full rounded-md border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+              />
+            </label>
+
+            <label className="mt-4 block">
+              <span className="mb-1.5 block text-sm font-medium text-foreground">
+                {dictionary.profile.aboutTitle}
+              </span>
+              <textarea
+                rows={3}
+                value={aboutInput}
+                onChange={(e) => setAboutInput(e.target.value)}
+                placeholder={dictionary.profile.aboutPlaceholder}
+                className="w-full rounded-md border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+              />
+            </label>
+
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <label className="block rounded-md border border-border bg-background px-3.5 py-2.5">
+                <span className="block text-[10px] font-bold tracking-wide text-muted-foreground uppercase">
+                  {dictionary.profile.cityLabel}
+                </span>
+                <CityPicker
+                  placeholder={dictionary.profile.cityPlaceholder}
+                  value={cityInput}
+                  onChange={setCityInput}
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium text-foreground">
+                  {dictionary.profile.phoneLabel}
+                </span>
+                <input
+                  value={phoneInput}
+                  onChange={(e) => setPhoneInput(e.target.value)}
+                  placeholder={dictionary.profile.phonePlaceholder}
+                  className="w-full rounded-md border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                />
+              </label>
+            </div>
+            <p className="mt-1.5 text-xs text-muted-foreground">{dictionary.profile.phoneHint}</p>
+
+            <div className="mt-5 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="font-heading flex-1 rounded-sm border border-border py-2.5 text-sm font-bold text-foreground"
+              >
+                {dictionary.profile.cancelCta}
+              </button>
+              <button
+                type="button"
+                onClick={saveProfile}
+                disabled={isSaving}
+                className="font-heading flex-1 rounded-sm bg-action py-2.5 text-sm font-bold text-on-action transition-colors hover:bg-action-hover disabled:opacity-60"
+              >
+                {dictionary.profile.saveProfileCta}
+              </button>
+            </div>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">{dictionary.profile.ratingLabel}</p>
-        </div>
+        ) : (
+          <>
+            <ProfileSummary profile={profile} />
+            <button
+              type="button"
+              onClick={startEditing}
+              className="font-heading mt-4 w-full rounded-sm border border-border py-3 text-sm font-bold text-foreground"
+            >
+              {dictionary.profile.editProfileCta}
+            </button>
+            <InviteLinkCard userId={profile.id} />
+            <SubscriptionsSection />
+            <ReviewsSection userId={profile.id} />
+          </>
+        )}
       </div>
 
       <div className="mt-6">
         <p className="mb-2 text-sm font-medium text-muted-foreground">
           {dictionary.profile.myListingsTitle}
         </p>
-        {isSignedIn === null ? (
-          <p className="text-sm text-muted-foreground">{dictionary.profile.myListingsLoading}</p>
-        ) : !isSignedIn ? (
-          <p className="text-sm text-muted-foreground">{dictionary.profile.myListingsSignInHint}</p>
-        ) : myListings.length === 0 ? (
+        {myListings.length === 0 ? (
           <p className="text-sm text-muted-foreground">{dictionary.profile.myListingsEmpty}</p>
         ) : (
           <div className="flex flex-col gap-2">
             {myListings.map((listing) => (
-              <Link
+              <div
                 key={listing.id}
-                href={`/listings/${listing.id}`}
-                className="flex items-center justify-between rounded-md border border-border bg-card p-3.5 shadow-sm transition-colors hover:border-primary/40"
+                className="flex items-center justify-between gap-3 rounded-md border border-border bg-card p-3.5 shadow-sm"
               >
-                <div>
-                  <p className="font-heading text-sm font-bold text-card-foreground">
+                <Link href={`/listings/${listing.id}`} className="min-w-0 flex-1">
+                  <p className="font-heading truncate text-sm font-bold text-card-foreground">
                     {listing.fromCity} → {listing.toCity}
                   </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{formatDate(listing.date)}</p>
-                </div>
-                <p className="font-heading text-sm font-bold text-card-foreground">
-                  {listing.pricePerKg} {listing.currency}
-                </p>
-              </Link>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {formatDate(listing.dateFrom)}
+                    {listing.status === "hidden_by_author" ? ` · ${dictionary.listing.statusHidden}` : null}
+                    {listing.status === "archived" ? ` · ${dictionary.listing.statusArchived}` : null}
+                  </p>
+                </Link>
+                {listing.status === "published" || listing.status === "hidden_by_author" ? (
+                  <button
+                    type="button"
+                    onClick={() => handleToggleVisibility(listing)}
+                    disabled={togglingListingId === listing.id}
+                    className="font-heading shrink-0 rounded-sm border border-border px-3 py-1.5 text-xs font-bold text-foreground disabled:opacity-50"
+                  >
+                    {togglingListingId === listing.id
+                      ? dictionary.createListing.hiding
+                      : listing.status === "published"
+                        ? dictionary.createListing.hideCta
+                        : dictionary.createListing.unhideCta}
+                  </button>
+                ) : null}
+              </div>
             ))}
           </div>
         )}
       </div>
 
-      <div className="mt-6">
-        <p className="mb-2 text-sm font-medium text-muted-foreground">
-          {dictionary.profile.routesTitle}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {currentUser.frequentRoutes.map((route) => (
-            <span
-              key={route}
-              className="rounded-sm border border-border bg-card px-3 py-1.5 text-sm text-foreground"
-            >
-              {route}
-            </span>
-          ))}
-        </div>
-      </div>
+      <Link
+        href="/complaints"
+        className="font-heading mt-6 block w-full rounded-sm border border-border py-3 text-center text-sm font-bold text-foreground"
+      >
+        {dictionary.moderation.myComplaintsLink}
+      </Link>
 
-      <div className="mt-6">
-        <p className="mb-2 text-sm font-medium text-muted-foreground">
-          {dictionary.profile.reviewsTitle}
-        </p>
-        <div className="flex flex-col gap-3">
-          {currentUser.reviews.map((review, i) => (
-            <div key={i} className="rounded-md border border-border bg-card p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-card-foreground">{review.author}</p>
-                <RatingStars value={review.rating} />
-              </div>
-              <p className="mt-1.5 text-sm text-muted-foreground">{review.text}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <Link
+        href="/support"
+        className="font-heading mt-2 block w-full rounded-sm border border-border py-3 text-center text-sm font-bold text-foreground"
+      >
+        {dictionary.support.cta}
+      </Link>
 
       <button
         type="button"
-        className="font-heading mt-6 w-full rounded-sm border border-border py-3 text-sm font-bold text-foreground"
+        onClick={async () => {
+          await signOut();
+          router.push("/");
+        }}
+        className="font-heading mt-2 w-full rounded-sm border border-border py-3 text-sm font-bold text-foreground"
       >
-        {dictionary.profile.editCta}
+        {dictionary.profile.signOutCta}
       </button>
     </div>
   );
