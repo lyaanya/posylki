@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { dictionary } from "@/lib/dictionary";
-import { loadPublishedListing, type ListingDraftFields } from "@/lib/listing-draft";
+import { loadPublishedListingId } from "@/lib/listing-draft";
+import { fetchListing, type Listing } from "@/lib/listings";
+import { formatDate } from "@/lib/format-date";
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
@@ -17,16 +19,23 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 /**
  * Экран после «опубликовать» на черновике — объявление уже реально
  * сохранено (draft/page.tsx вызывает apps/api перед переходом сюда).
- * Дальше — в ленту, это самое естественное продолжение: там курьер сразу
- * видит, как объявление выглядит среди остальных.
+ * Здесь только id, само объявление читается заново через fetchListing —
+ * чтобы не держать вторую копию его полей в sessionStorage.
  */
 export default function ListingPublishedPage() {
-  const [listing, setListing] = useState<ListingDraftFields | null>(null);
+  const [listing, setListing] = useState<Listing | null>(null);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    setListing(loadPublishedListing());
-    setIsReady(true);
+    const id = loadPublishedListingId();
+    if (!id) {
+      setIsReady(true);
+      return;
+    }
+    fetchListing(id).then((l) => {
+      setListing(l);
+      setIsReady(true);
+    });
   }, []);
 
   if (!isReady) {
@@ -46,8 +55,6 @@ export default function ListingPublishedPage() {
       </div>
     );
   }
-
-  const currency = "₽";
 
   return (
     <div className="py-10 text-center">
@@ -79,42 +86,61 @@ export default function ListingPublishedPage() {
           </span>
         </div>
         <div className="mt-3">
-          <SummaryRow label={dictionary.createListing.dateLabel} value={listing.date} />
+          <SummaryRow
+            label={dictionary.createListing.dateLabel}
+            value={
+              listing.dateFrom === listing.dateTo
+                ? formatDate(listing.dateFrom)
+                : `${formatDate(listing.dateFrom)} — ${formatDate(listing.dateTo)}`
+            }
+          />
           <SummaryRow label={dictionary.createListing.weightLabel} value={`${listing.weightKg} кг`} />
-          <SummaryRow
-            label={dictionary.createListing.priceStepLabel}
-            value={`${listing.pricePerKg} ${currency}`}
-          />
-          <SummaryRow
-            label={dictionary.createListing.minPriceStepLabel}
-            value={`${listing.minPrice} ${currency}`}
-          />
-          {listing.description ? (
+          {listing.pricePerKg !== null ? (
+            <SummaryRow
+              label={dictionary.createListing.priceStepLabel}
+              value={`${listing.pricePerKg} ${listing.currency}`}
+            />
+          ) : null}
+          {listing.minPrice !== null ? (
+            <SummaryRow
+              label={dictionary.createListing.minPriceStepLabel}
+              value={`${listing.minPrice} ${listing.currency}`}
+            />
+          ) : null}
+          {listing.priceTotal !== null ? (
+            <SummaryRow
+              label={dictionary.createListing.priceTotalLabel}
+              value={`${listing.priceTotal} ${listing.currency}`}
+            />
+          ) : null}
+          {listing.itemDescription ? (
             <div className="pt-2.5">
               <span className="block text-sm text-muted-foreground">
-                {dictionary.createListing.descriptionStepTitle}
+                {dictionary.createListing.itemDescriptionLabel}
               </span>
-              <p className="mt-1 text-sm text-foreground">{listing.description}</p>
+              <p className="mt-1 text-sm text-foreground">{listing.itemDescription}</p>
+            </div>
+          ) : null}
+          {listing.comment ? (
+            <div className="pt-2.5">
+              <span className="block text-sm text-muted-foreground">
+                {dictionary.createListing.commentLabel}
+              </span>
+              <p className="mt-1 text-sm text-foreground">{listing.comment}</p>
             </div>
           ) : null}
         </div>
       </div>
 
-      {listing.id ? (
-        <Link
-          href={`/listings/${listing.id}`}
-          className="font-heading mt-6 block w-full rounded-sm bg-action py-3 text-sm font-bold text-on-action transition-colors hover:bg-action-hover"
-        >
-          {dictionary.createListing.publishedViewCta}
-        </Link>
-      ) : null}
+      <Link
+        href={`/listings/${listing.id}`}
+        className="font-heading mt-6 block w-full rounded-sm bg-action py-3 text-sm font-bold text-on-action transition-colors hover:bg-action-hover"
+      >
+        {dictionary.createListing.publishedViewCta}
+      </Link>
       <Link
         href="/"
-        className={
-          listing.id
-            ? "mt-3 block text-sm font-semibold text-primary underline decoration-dotted underline-offset-2"
-            : "font-heading mt-6 block w-full rounded-sm bg-action py-3 text-sm font-bold text-on-action transition-colors hover:bg-action-hover"
-        }
+        className="mt-3 block text-sm font-semibold text-primary underline decoration-dotted underline-offset-2"
       >
         {dictionary.createListing.publishedGoToFeed}
       </Link>

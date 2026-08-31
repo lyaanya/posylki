@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { dictionary } from "@/lib/dictionary";
 import { type ListingType } from "@/lib/listings";
+import { fetchCurrencies, type Currency } from "@/lib/directories";
 import { CityPicker } from "@/components/CityPicker";
 import { WeightHint } from "@/components/WeightHint";
 import { AiListingAssist } from "@/components/AiListingAssist";
-import { saveListingDraft } from "@/lib/listing-draft";
+import { saveListingDraft, draftFromParsedText } from "@/lib/listing-draft";
+import { useSession } from "@/lib/auth";
 
 const TOTAL_STEPS = 3;
+const DEFAULT_CURRENCY_CODE = "RUB";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -26,26 +29,68 @@ const inputClass =
 
 export default function NewListingPage() {
   const router = useRouter();
+  const session = useSession();
   const [step, setStep] = useState(1);
   const [type, setType] = useState<ListingType>("trip");
   const [fromCity, setFromCity] = useState("");
   const [toCity, setToCity] = useState("");
-  const [date, setDate] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [weightKg, setWeightKg] = useState("");
+  const [currencyCode, setCurrencyCode] = useState(DEFAULT_CURRENCY_CODE);
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [pricePerKg, setPricePerKg] = useState("");
   const [minPrice, setMinPrice] = useState("");
-  const [description, setDescription] = useState("");
+  const [priceTotal, setPriceTotal] = useState("");
+  const [pickupInstructions, setPickupInstructions] = useState("");
+  const [dropoffInstructions, setDropoffInstructions] = useState("");
+  const [storageUntilDate, setStorageUntilDate] = useState("");
+  const [departureAirport, setDepartureAirport] = useState("");
+  const [arrivalAirport, setArrivalAirport] = useState("");
+  const [flightNumber, setFlightNumber] = useState("");
+  const [itemDescription, setItemDescription] = useState("");
+  const [comment, setComment] = useState("");
+
+  useEffect(() => {
+    if (session.status === "signedOut") {
+      router.replace("/login");
+    }
+  }, [session.status, router]);
+
+  useEffect(() => {
+    fetchCurrencies()
+      .then(setCurrencies)
+      .catch(() => setCurrencies([]));
+  }, []);
+
+  function saveAndGoToDraft() {
+    saveListingDraft({
+      type,
+      fromCity,
+      toCity,
+      dateFrom,
+      dateTo,
+      weightKg: Number(weightKg) || null,
+      currencyCode,
+      pricePerKg: pricePerKg ? Number(pricePerKg) : null,
+      minPrice: minPrice ? Number(minPrice) : null,
+      priceTotal: priceTotal ? Number(priceTotal) : null,
+      pickupInstructions: pickupInstructions || null,
+      dropoffInstructions: dropoffInstructions || null,
+      storageUntilDate: storageUntilDate || null,
+      departureAirport: departureAirport || null,
+      arrivalAirport: arrivalAirport || null,
+      flightNumber: flightNumber || null,
+      itemDescription: itemDescription || null,
+      comment: comment || null,
+    });
+    router.push("/listings/draft");
+  }
 
   const back = () => setStep((s) => Math.max(1, s - 1));
 
-  function handlePrimaryAction() {
-    if (step < TOTAL_STEPS) {
-      setStep((s) => Math.min(TOTAL_STEPS, s + 1));
-      return;
-    }
-
-    saveListingDraft({ type, fromCity, toCity, date, weightKg: Number(weightKg) || null, pricePerKg: Number(pricePerKg) || null, minPrice: Number(minPrice) || null, description });
-    router.push("/listings/draft");
+  if (session.status !== "signedIn") {
+    return null;
   }
 
   return (
@@ -75,7 +120,7 @@ export default function NewListingPage() {
                 // сразу — распознанные ИИ значения предзаполнены и доступны
                 // для правки, пустые подсвечены (E13 п. 13.26: подтверждение
                 // остаётся за человеком, ничего не публикуется само).
-                saveListingDraft(data);
+                saveListingDraft(draftFromParsedText(data));
                 router.push("/listings/draft");
               }}
             />
@@ -124,51 +169,32 @@ export default function NewListingPage() {
                 />
               </div>
             </div>
-            <Field label={dictionary.createListing.dateLabel}>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className={inputClass}
-              />
-            </Field>
-          </div>
-        ) : null}
-
-        {step === 2 ? (
-          <div className="flex flex-col gap-4">
-            <p className="text-sm font-medium text-foreground">
-              {dictionary.createListing.detailsStepTitle}
-            </p>
-            <Field label={dictionary.createListing.weightLabel}>
-              <input
-                type="number"
-                min={0}
-                placeholder="5"
-                value={weightKg}
-                onChange={(e) => setWeightKg(e.target.value)}
-                className={inputClass}
-              />
-              <WeightHint />
-            </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label={dictionary.createListing.priceStepLabel}>
+              <Field
+                label={
+                  type === "trip"
+                    ? dictionary.createListing.dateFromLabelTrip
+                    : dictionary.createListing.dateFromLabelRequest
+                }
+              >
                 <input
-                  type="number"
-                  min={0}
-                  placeholder="1200"
-                  value={pricePerKg}
-                  onChange={(e) => setPricePerKg(e.target.value)}
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
                   className={inputClass}
                 />
               </Field>
-              <Field label={dictionary.createListing.minPriceStepLabel}>
+              <Field
+                label={
+                  type === "trip"
+                    ? dictionary.createListing.dateToLabelTrip
+                    : dictionary.createListing.dateToLabelRequest
+                }
+              >
                 <input
-                  type="number"
-                  min={0}
-                  placeholder="3000"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
                   className={inputClass}
                 />
               </Field>
@@ -176,18 +202,188 @@ export default function NewListingPage() {
           </div>
         ) : null}
 
+        {step === 2 ? (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm font-medium text-foreground">
+              {type === "trip"
+                ? dictionary.createListing.detailsStepTitle
+                : dictionary.createListing.detailsStepTitleRequest}
+            </p>
+            <Field
+              label={
+                type === "trip" ? dictionary.createListing.weightLabel : dictionary.createListing.weightLabelRequest
+              }
+            >
+              <input
+                type="number"
+                min={0}
+                step={0.5}
+                placeholder="5"
+                value={weightKg}
+                onChange={(e) => setWeightKg(e.target.value)}
+                className={inputClass}
+              />
+              <WeightHint />
+            </Field>
+
+            <Field label={dictionary.createListing.currencyLabel}>
+              <select
+                value={currencyCode}
+                onChange={(e) => setCurrencyCode(e.target.value)}
+                className={inputClass}
+              >
+                {currencies.length === 0 ? (
+                  <option value={DEFAULT_CURRENCY_CODE}>{DEFAULT_CURRENCY_CODE}</option>
+                ) : (
+                  currencies.map((c) => (
+                    <option key={c.id} value={c.code}>
+                      {c.name} ({c.symbol})
+                    </option>
+                  ))
+                )}
+              </select>
+            </Field>
+
+            {type === "trip" ? (
+              <div className="grid grid-cols-2 gap-3">
+                <Field label={dictionary.createListing.priceStepLabel}>
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="1200"
+                    value={pricePerKg}
+                    onChange={(e) => setPricePerKg(e.target.value)}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label={dictionary.createListing.minPriceStepLabel}>
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="3000"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value)}
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label={dictionary.createListing.priceStepLabel}>
+                    <input
+                      type="number"
+                      min={0}
+                      placeholder="1200"
+                      value={pricePerKg}
+                      onChange={(e) => setPricePerKg(e.target.value)}
+                      disabled={priceTotal.length > 0}
+                      className={`${inputClass} disabled:opacity-50`}
+                    />
+                  </Field>
+                  <Field label={dictionary.createListing.priceTotalStepLabel}>
+                    <input
+                      type="number"
+                      min={0}
+                      placeholder="3000"
+                      value={priceTotal}
+                      onChange={(e) => setPriceTotal(e.target.value)}
+                      disabled={pricePerKg.length > 0}
+                      className={`${inputClass} disabled:opacity-50`}
+                    />
+                  </Field>
+                </div>
+                <p className="text-xs text-muted-foreground">{dictionary.createListing.priceHint}</p>
+              </>
+            )}
+          </div>
+        ) : null}
+
         {step === 3 ? (
           <div className="flex flex-col gap-3">
-            <p className="text-sm font-medium text-foreground">
-              {dictionary.createListing.descriptionStepTitle}
-            </p>
-            <textarea
-              rows={5}
-              placeholder={dictionary.createListing.descriptionPlaceholder}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className={inputClass}
-            />
+            {type === "trip" ? (
+              <>
+                <p className="text-sm font-medium text-foreground">
+                  {dictionary.createListing.logisticsStepTitle}
+                </p>
+                <Field label={dictionary.createListing.pickupInstructionsLabel}>
+                  <textarea
+                    rows={2}
+                    placeholder={dictionary.createListing.pickupInstructionsPlaceholder}
+                    value={pickupInstructions}
+                    onChange={(e) => setPickupInstructions(e.target.value)}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label={dictionary.createListing.dropoffInstructionsLabel}>
+                  <textarea
+                    rows={2}
+                    placeholder={dictionary.createListing.dropoffInstructionsPlaceholder}
+                    value={dropoffInstructions}
+                    onChange={(e) => setDropoffInstructions(e.target.value)}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label={dictionary.createListing.storageUntilLabel}>
+                  <input
+                    type="date"
+                    value={storageUntilDate}
+                    onChange={(e) => setStorageUntilDate(e.target.value)}
+                    className={inputClass}
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {dictionary.createListing.storageUntilHint}
+                  </p>
+                </Field>
+
+                <p className="mt-2 text-sm font-medium text-foreground">
+                  {dictionary.createListing.flightDetailsLabel}
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label={dictionary.createListing.departureAirportLabel}>
+                    <input
+                      value={departureAirport}
+                      onChange={(e) => setDepartureAirport(e.target.value)}
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label={dictionary.createListing.arrivalAirportLabel}>
+                    <input
+                      value={arrivalAirport}
+                      onChange={(e) => setArrivalAirport(e.target.value)}
+                      className={inputClass}
+                    />
+                  </Field>
+                </div>
+                <Field label={dictionary.createListing.flightNumberLabel}>
+                  <input
+                    value={flightNumber}
+                    onChange={(e) => setFlightNumber(e.target.value)}
+                    className={inputClass}
+                  />
+                </Field>
+              </>
+            ) : (
+              <Field label={dictionary.createListing.itemDescriptionLabel}>
+                <textarea
+                  rows={2}
+                  placeholder={dictionary.createListing.itemDescriptionPlaceholder}
+                  value={itemDescription}
+                  onChange={(e) => setItemDescription(e.target.value)}
+                  className={inputClass}
+                />
+              </Field>
+            )}
+
+            <Field label={dictionary.createListing.commentLabel}>
+              <textarea
+                rows={3}
+                placeholder={dictionary.createListing.descriptionPlaceholder}
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                className={inputClass}
+              />
+            </Field>
             <Link
               href="/stop-list"
               className="text-xs font-semibold text-primary underline decoration-dotted underline-offset-2"
@@ -210,7 +406,13 @@ export default function NewListingPage() {
         ) : null}
         <button
           type="button"
-          onClick={handlePrimaryAction}
+          onClick={() => {
+            if (step < TOTAL_STEPS) {
+              setStep((s) => Math.min(TOTAL_STEPS, s + 1));
+              return;
+            }
+            saveAndGoToDraft();
+          }}
           className="font-heading flex-1 rounded-sm bg-action py-3 text-sm font-bold text-on-action transition-colors hover:bg-action-hover"
         >
           {step === TOTAL_STEPS ? dictionary.createListing.reviewCta : dictionary.createListing.next}
