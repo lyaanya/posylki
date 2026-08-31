@@ -2,6 +2,8 @@ import { VerifiedBadge } from "./VerifiedBadge";
 
 type AvatarProps = {
   initials: string;
+  /** Фото профиля (E06 п. 6.12) — если задано, показывается вместо инициалов. */
+  imageUrl?: string | null;
   verified?: boolean;
   size?: "sm" | "md" | "lg";
 };
@@ -12,14 +14,25 @@ const sizeClasses: Record<NonNullable<AvatarProps["size"]>, string> = {
   lg: "size-16 text-lg",
 };
 
-export function Avatar({ initials, verified, size = "md" }: AvatarProps) {
+export function Avatar({ initials, imageUrl, verified, size = "md" }: AvatarProps) {
   return (
     <div className="relative inline-flex shrink-0">
-      <div
-        className={`${sizeClasses[size]} flex items-center justify-center rounded-full bg-primary font-heading font-semibold text-on-primary`}
-      >
-        {initials}
-      </div>
+      {imageUrl ? (
+        // Аватары хранятся в Storage под доменом Supabase, не в проекте —
+        // next/image потребовал бы настройки доверенных доменов ради того же
+        // результата, что и обычный <img>.
+        <img
+          src={imageUrl}
+          alt=""
+          className={`${sizeClasses[size]} rounded-full object-cover`}
+        />
+      ) : (
+        <div
+          className={`${sizeClasses[size]} flex items-center justify-center rounded-full bg-primary font-heading font-semibold text-on-primary`}
+        >
+          {initials}
+        </div>
+      )}
       {verified ? (
         <span className="absolute -right-0.5 -bottom-0.5">
           <VerifiedBadge compact />

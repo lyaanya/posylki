@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope, Inter } from "next/font/google";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
+import { AccountStatusGate } from "@/components/AccountStatusGate";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -28,7 +29,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru" className={`${manrope.variable} ${inter.variable}`}>
       <body className="antialiased">
         <Header />
-        <main className="mx-auto max-w-5xl px-4 pb-24 sm:px-6 md:pb-12">{children}</main>
+        <main className="mx-auto max-w-5xl px-4 pb-24 sm:px-6 md:pb-12">
+          <AccountStatusGate>{children}</AccountStatusGate>
+        </main>
         <BottomNav />
       </body>
     </html>

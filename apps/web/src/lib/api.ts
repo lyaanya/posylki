@@ -1,8 +1,4 @@
-/**
- * Базовый клиент для REST API (apps/api). Справочники (E05) — единственное,
- * что сейчас читается отсюда; остальной интерфейс всё ещё на моковых данных
- * из lib/mock-data.ts до соответствующих эпиков (E07 и далее).
- */
+/** Базовый клиент для публичных GET-эндпоинтов REST API (apps/api). */
 const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3000";
 
 export async function apiGet<T>(path: string): Promise<T> {

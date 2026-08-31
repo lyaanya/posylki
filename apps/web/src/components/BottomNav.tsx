@@ -3,6 +3,29 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { dictionary } from "@/lib/dictionary";
+import { useUnreadChatCount } from "@/lib/use-unread-chats";
+
+function ChatIcon({ active }: { active: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" className="size-6" fill="none" aria-hidden="true">
+      <path
+        d="M4 5.5h16a1 1 0 011 1V16a1 1 0 01-1 1H9l-4.5 4V17H4a1 1 0 01-1-1V6.5a1 1 0 011-1z"
+        stroke="currentColor"
+        strokeWidth={active ? 2 : 1.6}
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function UnreadBadge({ count }: { count: number }) {
+  if (count === 0) return null;
+  return (
+    <span className="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-action px-1 text-[10px] font-bold text-on-action">
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
 
 function FeedIcon({ active }: { active: boolean }) {
   return (
@@ -42,7 +65,9 @@ function ProfileIcon({ active }: { active: boolean }) {
 export function BottomNav() {
   const pathname = usePathname();
   const isFeed = pathname === "/";
+  const isChats = pathname === "/chat" || pathname.startsWith("/chat/");
   const isProfile = pathname === "/profile";
+  const unreadCount = useUnreadChatCount();
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-card/95 backdrop-blur md:hidden">
@@ -55,6 +80,19 @@ export function BottomNav() {
         >
           <FeedIcon active={isFeed} />
           {dictionary.nav.feed}
+        </Link>
+
+        <Link
+          href="/chat"
+          className={`relative flex flex-col items-center gap-0.5 px-4 py-1 text-xs ${
+            isChats ? "text-primary" : "text-muted-foreground"
+          }`}
+        >
+          <span className="relative inline-flex">
+            <ChatIcon active={isChats} />
+            <UnreadBadge count={unreadCount} />
+          </span>
+          {dictionary.nav.chats}
         </Link>
 
         <Link

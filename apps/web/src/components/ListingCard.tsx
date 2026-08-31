@@ -56,25 +56,37 @@ export function ListingCard({ listing }: { listing: Listing }) {
         <div className="text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
           {dictionary.listing.datesLabel}
           <span className="mt-0.5 block text-[13px] font-semibold text-foreground normal-case">
-            {formatDate(listing.date)}
+            {formatDate(listing.dateFrom)}
           </span>
         </div>
         <div className="text-right text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
           {dictionary.feed.freeWeight}
           <span className="mt-0.5 block text-[13px] font-semibold text-foreground normal-case">
-            {listing.freeWeightKg} кг
+            {listing.weightKg} кг
           </span>
         </div>
       </div>
 
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <span className="font-heading block text-lg font-extrabold text-card-foreground">
-            {listing.pricePerKg} {listing.currency}
-          </span>
-          <span className="text-[11px] text-muted-foreground">
-            {dictionary.feed.minPrice} {listing.minPrice} {listing.currency}
-          </span>
+          {listing.pricePerKg !== null ? (
+            <>
+              <span className="font-heading block text-lg font-extrabold text-card-foreground">
+                {listing.pricePerKg} {listing.currency}
+              </span>
+              {listing.minPrice !== null ? (
+                <span className="text-[11px] text-muted-foreground">
+                  {dictionary.feed.minPrice} {listing.minPrice} {listing.currency}
+                </span>
+              ) : null}
+            </>
+          ) : listing.priceTotal !== null ? (
+            <span className="font-heading block text-lg font-extrabold text-card-foreground">
+              {listing.priceTotal} {listing.currency}
+            </span>
+          ) : (
+            <span className="text-sm text-muted-foreground">{dictionary.feed.priceNotSpecified}</span>
+          )}
         </div>
         <span className="font-heading shrink-0 rounded-sm bg-action px-4 py-1.5 text-sm font-bold text-nowrap text-on-action">
           {listing.type === "trip" ? dictionary.listing.respondCta : dictionary.listing.offerCta}
@@ -82,9 +94,17 @@ export function ListingCard({ listing }: { listing: Listing }) {
       </div>
 
       <div className="flex items-center gap-2.5 border-t border-border/70 pt-3">
-        <div className="flex size-7 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-on-primary">
-          {listing.courier.initials}
-        </div>
+        {listing.courier.avatarUrl ? (
+          <img
+            src={listing.courier.avatarUrl}
+            alt=""
+            className="size-7 rounded-full object-cover"
+          />
+        ) : (
+          <div className="flex size-7 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-on-primary">
+            {listing.courier.initials}
+          </div>
+        )}
         <div className="min-w-0">
           <p className="truncate text-xs font-semibold text-foreground">{listing.courier.name}</p>
           <p className="text-[11px] text-muted-foreground">
