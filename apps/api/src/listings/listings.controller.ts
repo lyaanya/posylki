@@ -10,12 +10,14 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { AppException } from "../common/app-exception.js";
 import { decodeCursor, InvalidCursorError, type PaginatedResponse } from "../common/pagination.js";
 import { Public } from "../auth/public.decorator.js";
 import { CurrentUser } from "../auth/current-user.decorator.js";
+import { VerifiedGuard } from "../auth/verified.guard.js";
 import type { AuthUser } from "../auth/users.repository.js";
 import { ListingModerationScenario } from "../ai/scenarios/listing-moderation.scenario.js";
 import {
@@ -192,6 +194,13 @@ export class ListingsController {
     return listing;
   }
 
+  /**
+   * ТЗ E07 п. 7.15 — публикация объявления доступна только верифицированным
+   * пользователям (VerifiedGuard, тот же уровень доступа, что и вход в сделку
+   * в E10). AuthGuard применяется глобально (APP_GUARD), здесь достаточно
+   * VerifiedGuard поверх него.
+   */
+  @UseGuards(VerifiedGuard)
   @Post()
   async create(@Body() dto: CreateListingDto, @CurrentUser() user?: AuthUser): Promise<Listing> {
     if (!user) {
