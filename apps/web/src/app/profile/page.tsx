@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { dictionary } from "@/lib/dictionary";
 import { fetchMyListings, hideListing, unhideListing, type Listing } from "@/lib/listings";
 import { fetchMyProfile, setReferral, updateMyProfile, uploadMyAvatar, type OwnProfile } from "@/lib/profile";
+import { effectiveVerificationStatus, fetchMyVerification } from "@/lib/verification";
 import { resolveCityId } from "@/lib/directories";
 import { formatDate } from "@/lib/format-date";
 import { signOut, useSession } from "@/lib/auth";
@@ -20,16 +21,19 @@ import { SubscriptionsSection } from "@/components/SubscriptionsSection";
 
 /**
  * Свой профиль (E06 п. 6.8-6.11): фото, текст о себе, город и телефон
- * редактируются; имя и фамилия по-хорошему приходят из верификации (E04),
- * которая в этой итерации не реализована — см. profile.types.ts на бэкенде
- * для того же решения. Рейтинг/сделки/маршруты общие с публичным профилем
- * через ProfileSummary — до E10/E11 они всегда пустые.
+ * редактируются. Имя и фамилия по спецификации (4.20/6.9) должны приходить
+ * только из одобренной верификации и не редактироваться пользователем
+ * напрямую — это ещё не включено на уровне API (см. profile.controller.ts
+ * на бэкенде), поэтому поле здесь пока остаётся редактируемым.
  */
 export default function ProfilePage() {
   const router = useRouter();
   const session = useSession();
   const [myListings, setMyListings] = useState<Listing[]>([]);
   const [profile, setProfile] = useState<OwnProfile | null>(null);
+  const [verificationEffective, setVerificationEffective] = useState<
+    "not_submitted" | "pending" | "approved" | "rejected" | null
+  >(null);
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,6 +82,13 @@ export default function ProfilePage() {
     fetchMyListings().catch(() => []).then((listings) => {
       if (!cancelled) setMyListings(listings);
     });
+    fetchMyVerification()
+      .then((v) => {
+        if (!cancelled) setVerificationEffective(effectiveVerificationStatus(v));
+      })
+      .catch(() => {
+        if (!cancelled) setVerificationEffective("not_submitted");
+      });
 
     return () => {
       cancelled = true;
@@ -268,6 +279,18 @@ export default function ProfilePage() {
         ) : (
           <>
             <ProfileSummary profile={profile} />
+            {verificationEffective && verificationEffective !== "approved" ? (
+              <Link
+                href="/verification"
+                className="font-heading mt-4 block w-full rounded-sm bg-action py-3 text-center text-sm font-bold text-on-action"
+              >
+                {verificationEffective === "pending"
+                  ? dictionary.profile.verificationPendingCta
+                  : verificationEffective === "rejected"
+                    ? dictionary.profile.verificationRejectedCta
+                    : dictionary.profile.verifyCta}
+              </Link>
+            ) : null}
             <button
               type="button"
               onClick={startEditing}

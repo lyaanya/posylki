@@ -87,6 +87,7 @@ export default function ListingDraftPage() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [wasRejectedByModeration, setWasRejectedByModeration] = useState(false);
+  const [wasVerificationRequired, setWasVerificationRequired] = useState(false);
 
   useEffect(() => {
     const draft = loadListingDraft();
@@ -377,6 +378,14 @@ export default function ListingDraftPage() {
               {dictionary.support.cta}
             </Link>
           ) : null}
+          {wasVerificationRequired ? (
+            <Link
+              href="/verification"
+              className="mt-1.5 inline-block text-xs font-semibold text-primary underline decoration-dotted underline-offset-2"
+            >
+              {dictionary.createListing.verificationCta}
+            </Link>
+          ) : null}
         </div>
       ) : null}
 
@@ -436,8 +445,16 @@ export default function ListingDraftPage() {
             // прислал готовый шаблонный текст, показываем его как есть.
             const rejectedByModeration =
               err instanceof ListingApiError && err.code === "LISTING_REJECTED_BY_MODERATION";
+            const verificationRequired = err instanceof ListingApiError && err.code === "VERIFICATION_REQUIRED";
             setWasRejectedByModeration(rejectedByModeration);
-            setPublishError(rejectedByModeration ? err.message : dictionary.createListing.publishError);
+            setWasVerificationRequired(verificationRequired);
+            setPublishError(
+              rejectedByModeration
+                ? err.message
+                : verificationRequired
+                  ? dictionary.createListing.publishVerificationRequiredError
+                  : dictionary.createListing.publishError,
+            );
           } finally {
             setIsPublishing(false);
           }
