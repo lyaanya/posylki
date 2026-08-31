@@ -1,6 +1,6 @@
 import { apiGet, apiPost } from "./api";
 
-export type VerificationRejectionReason = "unreadable_photo" | "expired_document" | "data_mismatch" | "selfie_mismatch" | "other";
+export type VerificationRejectionReason = "unreadable_photo" | "expired_document" | "data_mismatch" | "selfie_mismatch" | "review_timeout" | "other";
 
 export interface VerificationRequest {
   id: string;

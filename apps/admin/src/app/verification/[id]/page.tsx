@@ -15,8 +15,18 @@ const REASON_LABEL: Record<VerificationRejectionReason, string> = {
   expired_document: "Истёк срок действия документа",
   data_mismatch: "Данные не совпадают",
   selfie_mismatch: "Селфи не совпадает с документом",
+  review_timeout: "Истёк срок рассмотрения (автоматически)",
   other: "Другое",
 };
+
+/** review_timeout проставляется только фоновой задачей (E04 п.4.16) — модератор его не выбирает. */
+const SELECTABLE_REASONS: VerificationRejectionReason[] = [
+  "unreadable_photo",
+  "expired_document",
+  "data_mismatch",
+  "selfie_mismatch",
+  "other",
+];
 
 /** ТЗ E16 пп.16.7-16.10 — карточка заявки: фото по временным ссылкам, история, решение с удалением файлов. */
 export default function VerificationDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -142,9 +152,9 @@ export default function VerificationDetailPage({ params }: { params: Promise<{ i
               onChange={(e) => setReason(e.target.value as VerificationRejectionReason)}
               className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-sm"
             >
-              {Object.entries(REASON_LABEL).map(([value, label]) => (
+              {SELECTABLE_REASONS.map((value) => (
                 <option key={value} value={value}>
-                  {label}
+                  {REASON_LABEL[value]}
                 </option>
               ))}
             </select>

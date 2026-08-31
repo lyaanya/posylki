@@ -10,6 +10,7 @@ import { SupabaseVerificationPhotoStorage } from "./verification-photo-storage.s
 import { VERIFICATION_REQUESTS_REPOSITORY } from "./verification-requests.repository.js";
 import { SupabaseVerificationRequestsRepository } from "./verification-requests.repository.supabase.js";
 import { VerificationController } from "./verification.controller.js";
+import { VerificationExpiryCronService } from "./verification-expiry-cron.service.js";
 
 @Module({
   imports: [AuthModule, DirectoriesModule, AdminModule, AuditLogModule, NotificationsModule],
@@ -17,6 +18,7 @@ import { VerificationController } from "./verification.controller.js";
   providers: [
     { provide: VERIFICATION_REQUESTS_REPOSITORY, useClass: SupabaseVerificationRequestsRepository },
     { provide: VERIFICATION_PHOTO_STORAGE, useClass: SupabaseVerificationPhotoStorage },
+    VerificationExpiryCronService,
   ],
   exports: [VERIFICATION_REQUESTS_REPOSITORY],
 })

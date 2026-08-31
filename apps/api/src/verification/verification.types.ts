@@ -6,6 +6,7 @@ export type VerificationRejectionReason =
   | "expired_document"
   | "data_mismatch"
   | "selfie_mismatch"
+  | "review_timeout"
   | "other";
 
 export interface VerificationRequestsTable {
@@ -63,7 +64,8 @@ export interface DecideVerificationInput {
   approved: boolean;
   rejectionReasonCode?: VerificationRejectionReason | null;
   rejectionComment?: string | null;
-  adminId: string;
+  /** null — решение принято автоматически (E04 п.4.16: 30 суток без ответа модератора), не человеком. */
+  adminId: string | null;
 }
 
 /** Публичный статус для пользователя — без фото/хэша, только то, что нужно показать (E04). */

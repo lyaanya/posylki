@@ -9,12 +9,15 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { ConfigService } from "@nestjs/config";
 import { ApiConsumes, ApiTags } from "@nestjs/swagger";
 import sharp from "sharp";
+import type { Env } from "../config/env.js";
 import { AppException } from "../common/app-exception.js";
 import { CurrentUser } from "../auth/current-user.decorator.js";
-import type { AuthUser } from "../auth/users.repository.js";
+import { USERS_REPOSITORY, type AuthUser, type IUsersRepository } from "../auth/users.repository.js";
 import { DOCUMENT_TYPES_REPOSITORY, type IDocumentTypesRepository } from "../directories/document-types.repository.js";
+import { isAdult } from "./age.js";
 import { hashDocumentNumber } from "./document-hash.js";
 import { SubmitVerificationDto } from "./dto/submit-verification.dto.js";
 import {
@@ -52,6 +55,8 @@ export class VerificationController {
     @Inject(VERIFICATION_REQUESTS_REPOSITORY) private readonly requests: IVerificationRequestsRepository,
     @Inject(VERIFICATION_PHOTO_STORAGE) private readonly photoStorage: IVerificationPhotoStorage,
     @Inject(DOCUMENT_TYPES_REPOSITORY) private readonly documentTypes: IDocumentTypesRepository,
+    @Inject(USERS_REPOSITORY) private readonly users: IUsersRepository,
+    @Inject(ConfigService) private readonly config: ConfigService<Env, true>,
   ) {}
 
   @Post("photos")
@@ -121,13 +126,37 @@ export class VerificationController {
       });
     }
 
+    // ТЗ E04 п.4.4 — сервисом пользуются лица от 18 лет.
+    if (!isAdult(dto.dateOfBirth)) {
+      throw new AppException({
+        code: "UNDERAGE",
+        message: "Сервисом можно пользоваться с 18 лет",
+        status: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    const salt = this.config.get("DOCUMENT_HASH_SALT", { infer: true });
+    const documentNumberHash = hashDocumentNumber(dto.documentNumber, salt);
+
+    // ТЗ E04 п.4.5 — тот же физический документ уже подтверждён на другом
+    // аккаунте (активном, заблокированном или удалённом). Текст нейтральный,
+    // без раскрытия чужих данных.
+    const ownerId = await this.users.findIdByDocumentHash(documentNumberHash);
+    if (ownerId && ownerId !== user.id) {
+      throw new AppException({
+        code: "DOCUMENT_ALREADY_USED",
+        message: "Этот документ уже привязан к другому аккаунту",
+        status: HttpStatus.BAD_REQUEST,
+      });
+    }
+
     return this.requests.create({
       userId: user.id,
       documentType: dto.documentType,
       submittedFirstName: dto.firstName,
       submittedLastName: dto.lastName,
       submittedDateOfBirth: dto.dateOfBirth,
-      documentNumberHash: hashDocumentNumber(dto.documentNumber),
+      documentNumberHash,
       documentPhotoPath: dto.documentPhotoPath,
       selfiePhotoPath: dto.selfiePhotoPath,
     });

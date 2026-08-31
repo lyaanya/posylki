@@ -19,8 +19,15 @@ export interface IUsersRepository {
   setBlocked(id: string, isBlocked: boolean, reason: string | null, executor?: Executor): Promise<void>;
   /** ТЗ E12 п.12.17/E03 п.22 — soft-delete, хэш документа не трогается. */
   softDelete(id: string, executor?: Executor): Promise<void>;
-  /** ТЗ E12 п.12.16 — заблокирован ли уже кто-то с этим хэшем документа (в т.ч. удалённый). */
-  isDocumentHashBanned(documentNumberHash: string, executor?: Executor): Promise<boolean>;
+  /**
+   * ТЗ E04 п.4.5 / E12 п.12.16 — id пользователя, за которым уже числится
+   * этот хэш документа (независимо от того, активен он, заблокирован или
+   * удалён — хэш переживает удаление, см. softDelete), либо null. Хэш
+   * записывается только при одобрении заявки, так что совпадение всегда
+   * означает "этот же физический документ уже подтверждён на другом
+   * аккаунте".
+   */
+  findIdByDocumentHash(documentNumberHash: string, executor?: Executor): Promise<string | null>;
   /**
    * ТЗ E04/E06 п.6.9 — при одобрении имя и дата рождения приходят из
    * проверенного документа, а не остаются тем, что пользователь вписал

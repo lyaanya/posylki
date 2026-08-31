@@ -106,13 +106,12 @@ export class SupabaseUsersRepository implements IUsersRepository {
     await executor.updateTable("users").set({ verification_status: "rejected" }).where("id", "=", id).execute();
   }
 
-  async isDocumentHashBanned(documentNumberHash: string, executor: Executor = this.db): Promise<boolean> {
+  async findIdByDocumentHash(documentNumberHash: string, executor: Executor = this.db): Promise<string | null> {
     const row = await executor
       .selectFrom("users")
       .select("id")
       .where("document_number_hash", "=", documentNumberHash)
-      .where((eb) => eb.or([eb("is_blocked", "=", true), eb("deleted_at", "is not", null)]))
       .executeTakeFirst();
-    return row !== undefined;
+    return row?.id ?? null;
   }
 }

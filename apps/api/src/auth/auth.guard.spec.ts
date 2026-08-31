@@ -28,7 +28,7 @@ describe("AuthGuard", () => {
       findById: vi.fn(),
       setBlocked: vi.fn(),
       softDelete: vi.fn(),
-      isDocumentHashBanned: vi.fn(),
+      findIdByDocumentHash: vi.fn(),
       approveVerification: vi.fn(),
       rejectVerification: vi.fn(),
     };
