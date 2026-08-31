@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { AuthModule } from "../auth/auth.module.js";
 import { DirectoriesModule } from "../directories/directories.module.js";
 import { ProfileModule } from "../profile/profile.module.js";
 import { EmailChannel } from "./channels/email.channel.js";
@@ -17,7 +18,7 @@ import { TELEGRAM_LINKS_REPOSITORY } from "./telegram-links.repository.js";
 import { SupabaseTelegramLinksRepository } from "./telegram-links.repository.supabase.js";
 
 @Module({
-  imports: [DirectoriesModule, ProfileModule],
+  imports: [AuthModule, DirectoriesModule, ProfileModule],
   controllers: [NotificationsController],
   providers: [
     NotificationsService,

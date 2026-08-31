@@ -34,6 +34,10 @@ const envSchema = z.object({
   APNS_KEY: z.string().min(1).optional(),
   FCM_SERVER_KEY: z.string().min(1).optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
+  // Адрес отправителя должен принадлежать домену, для которого в Resend
+  // настроены SPF/DKIM/DMARC — иначе письма уйдут в спам даже с рабочим
+  // ключом. Формат: "Посылки <notifications@example.com>".
+  NOTIFICATIONS_EMAIL_FROM: z.string().min(1).optional(),
   TELEGRAM_BOT_TOKEN: z.string().min(1).optional(),
 });
 
