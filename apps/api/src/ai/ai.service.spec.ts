@@ -14,7 +14,7 @@ function makeConfig(apiKey: string | undefined) {
 describe("AiService", () => {
   it("без ключа не роняет продукт — возвращает сбой и пишет его в лог (E13 п. 13.6)", async () => {
     const create = vi.fn().mockResolvedValue(undefined);
-    const requestLog: IAiRequestLogRepository = { create };
+    const requestLog: IAiRequestLogRepository = { create, getUsageSummary: vi.fn() };
 
     const service = new AiService(makeConfig(undefined), requestLog);
 
@@ -37,6 +37,7 @@ describe("AiService", () => {
   it("не падает, если сам лог не пишется — результат сценария важнее", async () => {
     const requestLog: IAiRequestLogRepository = {
       create: vi.fn().mockRejectedValue(new Error("db down")),
+      getUsageSummary: vi.fn(),
     };
 
     const service = new AiService(makeConfig(undefined), requestLog);
