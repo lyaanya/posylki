@@ -9,6 +9,7 @@ import {
   type VerificationDetail,
   type VerificationRejectionReason,
 } from "@/lib/verification";
+import { useDocumentTypeNames } from "@/lib/directories";
 
 const REASON_LABEL: Record<VerificationRejectionReason, string> = {
   unreadable_photo: "Нечитаемое фото",
@@ -39,6 +40,7 @@ export default function VerificationDetailPage({ params }: { params: Promise<{ i
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmingReject, setConfirmingReject] = useState(false);
   const [confirmingApprove, setConfirmingApprove] = useState(false);
+  const documentTypeNames = useDocumentTypeNames();
 
   useEffect(() => {
     fetchVerificationDetail(id)
@@ -98,7 +100,7 @@ export default function VerificationDetailPage({ params }: { params: Promise<{ i
           <dt className="text-[var(--color-muted-foreground)]">Дата рождения</dt>
           <dd>{request.submittedDateOfBirth}</dd>
           <dt className="text-[var(--color-muted-foreground)]">Тип документа</dt>
-          <dd>{request.documentType}</dd>
+          <dd>{documentTypeNames[request.documentType] ?? request.documentType}</dd>
           <dt className="text-[var(--color-muted-foreground)]">Подана</dt>
           <dd>{new Date(request.createdAt).toLocaleString("ru-RU")}</dd>
         </dl>

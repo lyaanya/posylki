@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchVerificationQueue, type VerificationQueueItem } from "@/lib/verification";
+import { useDocumentTypeNames } from "@/lib/directories";
 
 /** ТЗ E16 пп.16.6, 16.11 — очередь от старых к новым, время ожидания, среднее по очереди. */
 export default function VerificationQueuePage() {
   const [items, setItems] = useState<VerificationQueueItem[] | null>(null);
   const [averageWaitingMinutes, setAverageWaitingMinutes] = useState(0);
+  const documentTypeNames = useDocumentTypeNames();
 
   useEffect(() => {
     fetchVerificationQueue()
@@ -51,7 +53,9 @@ export default function VerificationQueuePage() {
                   <td className="p-3">
                     {item.submittedFirstName} {item.submittedLastName}
                   </td>
-                  <td className="p-3 text-[var(--color-muted-foreground)]">{item.documentType}</td>
+                  <td className="p-3 text-[var(--color-muted-foreground)]">
+                    {documentTypeNames[item.documentType] ?? item.documentType}
+                  </td>
                   <td className="p-3 text-[var(--color-muted-foreground)]">
                     {new Date(item.createdAt).toLocaleString("ru-RU")}
                   </td>

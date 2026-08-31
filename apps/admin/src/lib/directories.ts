@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { apiGet, apiPatch, apiPost } from "./api";
 
 export interface City {
@@ -73,4 +74,17 @@ export function setDirectoryItemActive<T>(
   isActive: boolean,
 ): Promise<T> {
   return apiPatch(`/admin/directories/${resource}/${id}/active`, { isActive });
+}
+
+/** Заявки на верификацию хранят только id типа документа — карточка модератора показывает название. */
+export function useDocumentTypeNames(): Record<string, string> {
+  const [names, setNames] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetchDirectory<DocumentType>("document-types")
+      .then((types) => setNames(Object.fromEntries(types.map((t) => [t.id, t.name]))))
+      .catch(() => setNames({}));
+  }, []);
+
+  return names;
 }
