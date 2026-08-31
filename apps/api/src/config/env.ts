@@ -24,6 +24,17 @@ const envSchema = z.object({
   // gpt-oss-120b — открытая модель OpenAI, бесплатно через Groq. Идентификатор
   // вынесен в переменную окружения (E13 п. 13.2) — смена модели без правки кода.
   GROQ_MODEL: z.string().default("openai/gpt-oss-120b"),
+
+  // --- Уведомления (E14) ---
+  // Все три — заявки на доступ, которые ещё не оформлены (нужен Apple
+  // Developer сертификат, проект Firebase, аккаунт в почтовом сервисе,
+  // токен Telegram-бота — см. отчёт эпика). Каналы ведут себя как ИИ-сервис
+  // без ключа: недоступность канала логируется, но не роняет приложение и
+  // не блокирует основной сценарий (14.17).
+  APNS_KEY: z.string().min(1).optional(),
+  FCM_SERVER_KEY: z.string().min(1).optional(),
+  RESEND_API_KEY: z.string().min(1).optional(),
+  TELEGRAM_BOT_TOKEN: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

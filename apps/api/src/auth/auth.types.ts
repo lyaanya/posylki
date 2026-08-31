@@ -15,14 +15,40 @@ export interface UsersTable {
   document_type: string | null;
   document_number_hash: string | null;
   verification_status: VerificationStatus;
-  verified_at: ColumnType<Date | null, never, never>;
+  /** ТЗ E04 — теперь есть настоящий писатель (verification/verification-requests.repository.supabase.ts approveVerification). */
+  verified_at: ColumnType<Date | null, string | null, string | null>;
   verified_by_admin_id: string | null;
   referred_by_id: string | null;
   is_blocked: boolean;
   blocked_reason: string | null;
-  deleted_at: ColumnType<Date | null, never, never>;
+  /** ТЗ E12 п.12.17 — теперь есть настоящий писатель (moderation/delete-account.ts). */
+  deleted_at: ColumnType<Date | null, never, string>;
   created_at: ColumnType<Date, never, never>;
   updated_at: ColumnType<Date, never, never>;
+  /** E06 п. 6.8 — город проживания, из справочника (E05). */
+  city_id: string | null;
+  /**
+   * E06 п. 6.13-6.15 — денормализованные показатели репутации, пересчитываются
+   * событийно при завершении сделки (E10) и публикации отзыва (E11). Ни один
+   * из этих эпиков ещё не реализован, поэтому приложение сейчас эти колонки
+   * только читает (всегда пусто/ноль) и никогда не пишет.
+   */
+  courier_rating: ColumnType<number | null, never, never>;
+  courier_deals_count: ColumnType<number, never, never>;
+  customer_rating: ColumnType<number | null, never, never>;
+  customer_deals_count: ColumnType<number, never, never>;
+  frequent_routes: ColumnType<string[], never, never>;
+}
+
+/**
+ * Подмножество служебной таблицы Supabase Auth (не наша миграция, схему не
+ * контролируем) — только то, что реально нужно бизнес-логике: узнать,
+ * подтверждён ли email (ТЗ E09 п.9.17 — писать в чат можно только с
+ * подтверждённой почтой).
+ */
+export interface AuthUsersTable {
+  id: string;
+  email_confirmed_at: ColumnType<Date | null, never, never>;
 }
 
 export type LegalDocumentType = "terms" | "privacy" | "service_rules" | "consent";

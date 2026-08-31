@@ -23,6 +23,13 @@ export function configureApp(app: INestApplication): void {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      // Без exposeDefaultValues class-transformer не проставляет значения
+      // по умолчанию у полей DTO (например PaginationQueryDto.limit = 20),
+      // если клиент вовсе не передал query-параметр — filter.limit
+      // оставался undefined, а `.limit(undefined + 1)` = `.limit(NaN)`
+      // падал с ошибкой Postgres прямо в рантайме на любом списочном
+      // эндпоинте без явного ?limit=.
+      transformOptions: { exposeDefaultValues: true },
     }),
   );
 }

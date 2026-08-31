@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { Kysely, Selectable } from "kysely";
+import { sql, type Kysely, type Selectable } from "kysely";
 import type { DB, Executor } from "../database/database.js";
 import { DATABASE } from "../database/database.module.js";
 import type { IUserSessionsRepository } from "./user-sessions.repository.js";
@@ -60,9 +60,13 @@ export class SupabaseUserSessionsRepository implements IUserSessionsRepository {
   }
 
   async touch(id: string, executor: Executor = this.db): Promise<void> {
+    // now() на стороне БД, а не new Date() в приложении — та же временная
+    // шкала, что и у DEFAULT now() при создании строки (create() выше),
+    // иначе рассинхрон часов клиента и сервера БД мог сделать "более новую"
+    // отметку меньше исходной.
     await executor
       .updateTable("user_sessions")
-      .set({ last_seen_at: new Date().toISOString() })
+      .set({ last_seen_at: sql`now()` })
       .where("id", "=", id)
       .execute();
   }
