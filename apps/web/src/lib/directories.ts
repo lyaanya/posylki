@@ -12,6 +12,14 @@ export interface City {
   synonyms: string[];
 }
 
+export interface Currency {
+  id: string;
+  code: string;
+  name: string;
+  symbol: string;
+  decimalPlaces: number;
+}
+
 export interface WeightReference {
   id: string;
   name: string;
@@ -47,6 +55,15 @@ export async function resolveCityId(nameRu: string): Promise<string | null> {
   const results = await searchCities(trimmed);
   const exact = results.find((city) => city.nameRu === trimmed);
   return (exact ?? results[0])?.id ?? null;
+}
+
+export function fetchCurrencies(): Promise<Currency[]> {
+  return apiGet<Currency[]>("/directories/currencies");
+}
+
+export async function resolveCurrencyId(code: string): Promise<string | null> {
+  const currencies = await fetchCurrencies();
+  return currencies.find((c) => c.code === code)?.id ?? null;
 }
 
 export function fetchWeightReferences(): Promise<WeightReference[]> {
