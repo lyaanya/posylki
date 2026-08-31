@@ -32,6 +32,12 @@ export class SupabaseCurrenciesRepository implements ICurrenciesRepository {
     return rows.map(toEntity);
   }
 
+  /** ТЗ E16 п.16.26 — админ-панель видит и отключённые записи, чтобы их можно было включить обратно. */
+  async findAll(executor: Executor = this.db): Promise<Currency[]> {
+    const rows = await executor.selectFrom("currencies").selectAll().orderBy("code", "asc").execute();
+    return rows.map(toEntity);
+  }
+
   async findByCode(code: string, executor: Executor = this.db): Promise<Currency | null> {
     const row = await executor
       .selectFrom("currencies")

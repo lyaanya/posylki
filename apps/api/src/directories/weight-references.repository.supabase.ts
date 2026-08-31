@@ -38,6 +38,12 @@ export class SupabaseWeightReferencesRepository implements IWeightReferencesRepo
     return rows.map(toEntity);
   }
 
+  /** ТЗ E16 п.16.26 — включая отключённые, для админ-панели. */
+  async findAll(executor: Executor = this.db): Promise<WeightReference[]> {
+    const rows = await executor.selectFrom("weight_references").selectAll().orderBy("sort_order", "asc").execute();
+    return rows.map(toEntity);
+  }
+
   async findById(id: string, executor: Executor = this.db): Promise<WeightReference | null> {
     const row = await executor
       .selectFrom("weight_references")

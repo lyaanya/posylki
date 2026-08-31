@@ -33,6 +33,12 @@ export class SupabaseDocumentTypesRepository implements IDocumentTypesRepository
     return rows.map(toEntity);
   }
 
+  /** ТЗ E16 п.16.26 — включая отключённые, для админ-панели. */
+  async findAll(executor: Executor = this.db): Promise<DocumentType[]> {
+    const rows = await executor.selectFrom("document_types").selectAll().orderBy("name", "asc").execute();
+    return rows.map(toEntity);
+  }
+
   async findById(id: string, executor: Executor = this.db): Promise<DocumentType | null> {
     const row = await executor
       .selectFrom("document_types")

@@ -11,7 +11,7 @@ export class SupabaseAdminUserRepository implements IAdminUserRepository {
   async findById(id: string, executor: Executor = this.db): Promise<AdminUser | null> {
     const row = await executor
       .selectFrom("admin_users")
-      .select(["id", "email", "full_name", "role", "is_active"])
+      .select(["id", "email", "full_name", "role", "is_active", "totp_secret"])
       .where("id", "=", id)
       .executeTakeFirst();
 
@@ -25,6 +25,27 @@ export class SupabaseAdminUserRepository implements IAdminUserRepository {
       fullName: row.full_name,
       role: row.role,
       isActive: row.is_active,
+      totpSecret: row.totp_secret,
     };
+  }
+
+  async findAllActive(executor: Executor = this.db): Promise<AdminUser[]> {
+    const rows = await executor
+      .selectFrom("admin_users")
+      .select(["id", "email", "full_name", "role", "is_active", "totp_secret"])
+      .where("is_active", "=", true)
+      .execute();
+    return rows.map((row) => ({
+      id: row.id,
+      email: row.email,
+      fullName: row.full_name,
+      role: row.role,
+      isActive: row.is_active,
+      totpSecret: row.totp_secret,
+    }));
+  }
+
+  async setTotpSecret(id: string, secret: string, executor: Executor = this.db): Promise<void> {
+    await executor.updateTable("admin_users").set({ totp_secret: secret }).where("id", "=", id).execute();
   }
 }

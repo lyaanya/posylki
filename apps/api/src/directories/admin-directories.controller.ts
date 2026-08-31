@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Inject,
   NotFoundException,
   Param,
@@ -11,7 +12,9 @@ import {
 import { ApiTags } from "@nestjs/swagger";
 import { AUDIT_LOG_REPOSITORY, type IAuditLogRepository } from "../audit-log/audit-log.repository.js";
 import { AdminGuard } from "../admin/admin.guard.js";
+import { AdminRoleGuard } from "../admin/admin-role.guard.js";
 import { CurrentAdmin } from "../admin/current-admin.decorator.js";
+import { RequireAdminRole } from "../admin/require-admin-role.decorator.js";
 import type { AdminUser } from "../admin/admin-user.repository.js";
 import { CITIES_REPOSITORY, type ICitiesRepository } from "./cities.repository.js";
 import { CURRENCIES_REPOSITORY, type ICurrenciesRepository } from "./currencies.repository.js";
@@ -37,7 +40,8 @@ import { CreateDocumentTypeDto, UpdateDocumentTypeDto } from "./dto/document-typ
  * отключение, которое безопасно всегда).
  */
 @ApiTags("admin/directories")
-@UseGuards(AdminGuard)
+@UseGuards(AdminGuard, AdminRoleGuard)
+@RequireAdminRole("admin")
 @Controller("admin/directories")
 export class AdminDirectoriesController {
   constructor(
@@ -50,6 +54,11 @@ export class AdminDirectoriesController {
   ) {}
 
   // === cities ===============================================================
+
+  @Get("cities")
+  async listCities() {
+    return this.cities.findAll();
+  }
 
   @Post("cities")
   async createCity(@Body() dto: CreateCityDto, @CurrentAdmin() admin: AdminUser) {
@@ -87,6 +96,11 @@ export class AdminDirectoriesController {
   }
 
   // === currencies ============================================================
+
+  @Get("currencies")
+  async listCurrencies() {
+    return this.currencies.findAll();
+  }
 
   @Post("currencies")
   async createCurrency(@Body() dto: CreateCurrencyDto, @CurrentAdmin() admin: AdminUser) {
@@ -127,6 +141,11 @@ export class AdminDirectoriesController {
   }
 
   // === weight references =====================================================
+
+  @Get("weight-references")
+  async listWeightReferences() {
+    return this.weightReferences.findAll();
+  }
 
   @Post("weight-references")
   async createWeightReference(
@@ -171,6 +190,11 @@ export class AdminDirectoriesController {
 
   // === stop list ==============================================================
 
+  @Get("stop-list")
+  async listStopListItems() {
+    return this.stopListItems.findAll();
+  }
+
   @Post("stop-list")
   async createStopListItem(@Body() dto: CreateStopListItemDto, @CurrentAdmin() admin: AdminUser) {
     const item = await this.stopListItems.create(dto);
@@ -210,6 +234,11 @@ export class AdminDirectoriesController {
   }
 
   // === document types =========================================================
+
+  @Get("document-types")
+  async listDocumentTypes() {
+    return this.documentTypes.findAll();
+  }
 
   @Post("document-types")
   async createDocumentType(@Body() dto: CreateDocumentTypeDto, @CurrentAdmin() admin: AdminUser) {

@@ -39,6 +39,12 @@ export class SupabaseStopListItemsRepository implements IStopListItemsRepository
     return rows.map(toEntity);
   }
 
+  /** ТЗ E16 п.16.26 — включая отключённые, для админ-панели. */
+  async findAll(executor: Executor = this.db): Promise<StopListItem[]> {
+    const rows = await executor.selectFrom("stop_list_items").selectAll().orderBy("name", "asc").execute();
+    return rows.map(toEntity);
+  }
+
   async findById(id: string, executor: Executor = this.db): Promise<StopListItem | null> {
     const row = await executor
       .selectFrom("stop_list_items")

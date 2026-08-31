@@ -3,6 +3,8 @@ import type { DocumentType, NewDocumentType, UpdateDocumentType } from "./direct
 
 export interface IDocumentTypesRepository {
   findAllActive(country?: string, executor?: Executor): Promise<DocumentType[]>;
+  /** ТЗ E16 п.16.26 — включая отключённые, для админ-панели. */
+  findAll(executor?: Executor): Promise<DocumentType[]>;
   findById(id: string, executor?: Executor): Promise<DocumentType | null>;
   create(input: NewDocumentType, executor?: Executor): Promise<DocumentType>;
   update(id: string, input: UpdateDocumentType, executor?: Executor): Promise<DocumentType | null>;

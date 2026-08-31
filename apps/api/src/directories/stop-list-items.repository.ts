@@ -4,6 +4,8 @@ import type { NewStopListItem, StopListItem, UpdateStopListItem } from "./direct
 export interface IStopListItemsRepository {
   /** country_code = null означает "везде" (5.13); country передаётся, если известна страна назначения. */
   findAllActive(country?: string, executor?: Executor): Promise<StopListItem[]>;
+  /** ТЗ E16 п.16.26 — включая отключённые, для админ-панели. */
+  findAll(executor?: Executor): Promise<StopListItem[]>;
   findById(id: string, executor?: Executor): Promise<StopListItem | null>;
   create(input: NewStopListItem, executor?: Executor): Promise<StopListItem>;
   update(id: string, input: UpdateStopListItem, executor?: Executor): Promise<StopListItem | null>;

@@ -3,6 +3,8 @@ import type { NewWeightReference, UpdateWeightReference, WeightReference } from 
 
 export interface IWeightReferencesRepository {
   findAllActive(executor?: Executor): Promise<WeightReference[]>;
+  /** ТЗ E16 п.16.26 — включая отключённые, для админ-панели. */
+  findAll(executor?: Executor): Promise<WeightReference[]>;
   findById(id: string, executor?: Executor): Promise<WeightReference | null>;
   create(input: NewWeightReference, executor?: Executor): Promise<WeightReference>;
   update(
