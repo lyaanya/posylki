@@ -24,7 +24,14 @@ describe("AuthGuard", () => {
 
   beforeEach(() => {
     jwtService = { verify: vi.fn() };
-    usersRepository = { findById: vi.fn() };
+    usersRepository = {
+      findById: vi.fn(),
+      setBlocked: vi.fn(),
+      softDelete: vi.fn(),
+      isDocumentHashBanned: vi.fn(),
+      approveVerification: vi.fn(),
+      rejectVerification: vi.fn(),
+    };
     reflector = new Reflector();
   });
 
@@ -70,7 +77,9 @@ describe("AuthGuard", () => {
       email: "a@example.com",
       verificationStatus: "approved",
       isBlocked: false,
+      blockedReason: null,
       deletedAt: null,
+      emailConfirmed: true,
     });
     const guard = makeGuard(false);
     const { context, request } = makeContext({ authorization: "Bearer valid" });
@@ -80,20 +89,23 @@ describe("AuthGuard", () => {
     expect(request["authSessionId"]).toBe("sess-1");
   });
 
-  it("отклоняет заблокированного пользователя, даже если токен валиден", async () => {
+  it("отклоняет заблокированного пользователя кодом ACCOUNT_BLOCKED с причиной, даже если токен валиден", async () => {
     vi.mocked(jwtService.verify).mockResolvedValue({ userId: "user-1", sessionId: null });
     vi.mocked(usersRepository.findById).mockResolvedValue({
       id: "user-1",
       email: "a@example.com",
       verificationStatus: "approved",
       isBlocked: true,
+      blockedReason: "Мошенничество",
       deletedAt: null,
+      emailConfirmed: true,
     });
     const guard = makeGuard(false);
     const { context } = makeContext({ authorization: "Bearer valid" });
 
     await expect(guard.canActivate(context)).rejects.toMatchObject({
-      code: "AUTH_REQUIRED",
+      code: "ACCOUNT_BLOCKED",
+      message: "Мошенничество",
     });
   });
 });

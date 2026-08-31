@@ -19,7 +19,9 @@ describe("VerifiedGuard", () => {
       email: "a@example.com",
       verificationStatus: "approved",
       isBlocked: false,
+      blockedReason: null,
       deletedAt: null,
+      emailConfirmed: true,
     });
 
     expect(guard.canActivate(context)).toBe(true);
@@ -31,7 +33,9 @@ describe("VerifiedGuard", () => {
       email: "a@example.com",
       verificationStatus: "pending",
       isBlocked: false,
+      blockedReason: null,
       deletedAt: null,
+      emailConfirmed: true,
     });
 
     expect(() => guard.canActivate(context)).toThrowError(
