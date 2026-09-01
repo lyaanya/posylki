@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { dictionary } from "@/lib/dictionary";
 import {
@@ -29,6 +29,15 @@ const STATUS_LABEL: Record<SupportTicket["status"], string> = {
  * отчёт эпика): все сообщения читает и на все отвечает только модератор.
  */
 export default function SupportPage() {
+  return (
+    <Suspense fallback={<div className="py-6 text-sm text-muted-foreground">{dictionary.support.loading}</div>}>
+      <SupportPageInner />
+    </Suspense>
+  );
+}
+
+/** useSearchParams требует границу Suspense при статическом экспорте (next build). */
+function SupportPageInner() {
   const searchParams = useSearchParams();
   const [ticket, setTicket] = useState<SupportTicket | null>(null);
   const [messages, setMessages] = useState<SupportMessage[]>([]);
